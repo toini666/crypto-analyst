@@ -20,6 +20,7 @@ Dark, unique (pas de mode clair) : l'outil s'utilise le soir, lumière ambiante 
 | `--accent` | `oklch(0.78 0.14 75)` | ambre : « à surveiller », warnings |
 | `--success` | `oklch(0.72 0.17 150)` | « à privilégier », succès |
 | `--danger` | `oklch(0.64 0.19 25)` | « à éviter », red flags critiques, erreurs |
+| `--danger-ink` | `oklch(0.14 0.04 25)` | texte sur fond danger (boutons destructifs) |
 
 Stratégie : **Restrained** — neutres purs + cobalt ≤ 10 % de la surface. Les couleurs de verdict (success/accent/danger) sont sémantiques, réservées aux scores, badges et red flags.
 
@@ -33,6 +34,10 @@ Stratégie : **Restrained** — neutres purs + cobalt ≤ 10 % de la surface. Le
 
 Échelle fixe (rem), ratio ~1.2 : 0.75 / 0.8125 / 0.875 / 1 / 1.25 / 1.5 / 1.875 / 2.25. Rapport : corps de lecture 1.0625rem Newsreader-adjacent (Geist), max 72ch.
 
+## Icons
+
+`lucide-react` exclusivement, style outline : 16 px (`size-4`), `strokeWidth={1.75}`, toujours `aria-hidden` (le label est porté par le texte adjacent ou un `aria-label` sur le bouton). Pas de SVG inline ni de glyphes Unicode en guise d'icônes (la jauge ScoreDial, dessin de données, reste du SVG maison).
+
 ## Components
 
 - **AnalysisCard** : ligne de dossier (pas une carte décorative) — ticker mono, nom, score, badge verdict, date ; états hover/focus/running.
@@ -42,6 +47,7 @@ Stratégie : **Restrained** — neutres purs + cobalt ≤ 10 % de la surface. Le
 - **PipelineStepper** : étapes verticales avec états (à venir / en cours / ok / warn / erreur), flux d'événements mono en dessous.
 - **RedFlagsPanel** : table de sévérité, jamais adoucie (critique = danger plein).
 - **Report** : rendu Markdown éditorial (Newsreader pour h1-h3, tables denses Geist Mono).
+- **ConfirmDialog** : `<dialog>` natif (top layer, focus trap, Échap) pour toute action destructive — jamais de `window.confirm`. Surface + bordure du système, backdrop `oklch(0 0 0 / 0.6)`, entrée 200 ms (`@starting-style`), bouton de confirmation `danger`/`danger-ink` libellé verbe + objet, annulation focusée par défaut.
 
 ## Motion (GSAP)
 

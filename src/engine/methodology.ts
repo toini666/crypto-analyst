@@ -4,7 +4,9 @@
 
 import type { PillarId } from "@/lib/types";
 
-export const METHODOLOGY_VERSION = "1.0.0";
+// 1.1.0 — les red flags qualitatifs portent leur propre sévérité (classifiée par
+//          Claude avec critères explicites) au lieu d'être tous traités en "major".
+export const METHODOLOGY_VERSION = "1.1.0";
 
 export interface ComponentDef {
   id: string;

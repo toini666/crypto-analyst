@@ -8,11 +8,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { ArrowLeft, RotateCcw, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { deleteAnalysis, launchAnalysis } from "@/lib/api";
 import type { AnalysisEvent, AnalysisRow } from "@/lib/types";
 import { PipelineStepper } from "@/components/PipelineStepper";
 import { ReportView } from "@/components/ReportView";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 gsap.registerPlugin(useGSAP);
 
@@ -22,6 +24,9 @@ export default function AnalysisPage({ params }: { params: Promise<{ id: string 
   const [row, setRow] = useState<AnalysisRow | null>(null);
   const [events, setEvents] = useState<AnalysisEvent[]>([]);
   const [notFound, setNotFound] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -76,11 +81,17 @@ export default function AnalysisPage({ params }: { params: Promise<{ id: string 
     router.push(`/analyses/${newId}`);
   }
 
-  async function onDelete() {
+  async function confirmDelete() {
     if (!row) return;
-    if (!window.confirm(`Supprimer l'analyse de ${row.token_name} ?`)) return;
-    await deleteAnalysis(row.id);
-    router.push("/");
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteAnalysis(row.id);
+      router.push("/");
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "La suppression a échoué");
+      setDeleting(false);
+    }
   }
 
   if (notFound) {
@@ -108,19 +119,42 @@ export default function AnalysisPage({ params }: { params: Promise<{ id: string 
       <nav className="mb-6">
         <Link
           href="/"
-          className="text-sm text-muted transition-colors duration-150 hover:text-ink"
+          className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors duration-150 hover:text-ink"
         >
-          ← Toutes les analyses
+          <ArrowLeft className="size-4" strokeWidth={1.75} aria-hidden />
+          Toutes les analyses
         </Link>
       </nav>
 
       {row.status === "completed" ? (
         <ReportView row={row} />
       ) : row.status === "failed" ? (
-        <FailedView row={row} events={events} onRelaunch={onRelaunch} onDelete={onDelete} />
+        <FailedView
+          row={row}
+          events={events}
+          onRelaunch={onRelaunch}
+          onDelete={() => {
+            setDeleteError(null);
+            setConfirmingDelete(true);
+          }}
+        />
       ) : (
         <ProgressView row={row} events={events} />
       )}
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Supprimer l'analyse ?"
+        description={`L'analyse de ${row.token_name} et son rapport seront définitivement supprimés.`}
+        confirmLabel="Supprimer l'analyse"
+        pendingLabel="Suppression…"
+        pending={deleting}
+        error={deleteError}
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          if (!deleting) setConfirmingDelete(false);
+        }}
+      />
     </div>
   );
 }
@@ -221,14 +255,16 @@ function FailedView({
         <div className="mt-4 flex gap-3">
           <button
             onClick={onRelaunch}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-ink transition-opacity duration-150 hover:opacity-90"
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-ink transition-opacity duration-150 hover:opacity-90"
           >
+            <RotateCcw className="size-4" strokeWidth={1.75} aria-hidden />
             Relancer l&apos;analyse
           </button>
           <button
             onClick={onDelete}
-            className="rounded-md border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-danger hover:text-danger"
+            className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-danger hover:text-danger"
           >
+            <Trash2 className="size-4" strokeWidth={1.75} aria-hidden />
             Supprimer
           </button>
         </div>

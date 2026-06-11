@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Crypto Analyst — règles projet
 
-Moteur personnel de due diligence crypto. Lire `CADRAGE.md` (méthodologie), `PRODUCT.md` et `DESIGN.md` (design) avant toute évolution significative.
+Moteur personnel de due diligence crypto. Lire `CADRAGE.md` (méthodologie), `PRODUCT.md` et `DESIGN.md` (design) avant toute évolution significative. `ROADMAP.md` trace l'état d'avancement vers la V1 : la consulter en début de session, cocher/mettre à jour en fin de session.
 
 ## Invariants (décisions utilisateur, ne pas remettre en cause)
 
@@ -18,6 +18,7 @@ Moteur personnel de due diligence crypto. Lire `CADRAGE.md` (méthodologie), `PR
 
 ## Commandes
 
+- `./start.sh` : tout-en-un (Supabase local si besoin + `pnpm dev` + ouverture du navigateur)
 - `pnpm dev` (nécessite `supabase start` au préalable)
 - `pnpm typecheck && pnpm lint && pnpm build` avant de considérer un changement terminé
 - `pnpm analyze <analysisId>` : relance le pipeline d'une ligne existante (logs : `logs/<id>.log`)

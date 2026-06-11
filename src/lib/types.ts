@@ -102,7 +102,7 @@ export interface QualSection {
   score: number | null;
   resume: string;
   analyse: string;
-  red_flags: string[];
+  red_flags: { severity: RedFlagSeverity; label: string }[];
   sources: string[];
 }
 

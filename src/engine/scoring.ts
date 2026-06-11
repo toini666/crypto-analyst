@@ -164,9 +164,9 @@ export function computeScoring(
     for (const [sectionId, section] of Object.entries(qual.sections)) {
       for (const rf of section.red_flags ?? []) {
         redFlags.push({
-          severity: "major",
+          severity: rf.severity,
           code: `QUAL_${sectionId.toUpperCase()}`,
-          label: rf,
+          label: rf.label,
           source: "Analyse qualitative (sourcée)",
         });
       }

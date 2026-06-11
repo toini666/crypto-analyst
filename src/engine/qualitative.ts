@@ -9,11 +9,16 @@ import os from "node:os";
 import { z } from "zod";
 import type { Metrics, QualitativeResult, RedFlag } from "@/lib/types";
 
+const redFlagSchema = z.object({
+  severity: z.enum(["critical", "major", "minor"]),
+  label: z.string(),
+});
+
 const sectionSchema = z.object({
   score: z.number().min(0).max(100).nullable(),
   resume: z.string(),
   analyse: z.string(),
-  red_flags: z.array(z.string()).default([]),
+  red_flags: z.array(redFlagSchema).default([]),
   sources: z.array(z.string()).default([]),
 });
 
@@ -63,6 +68,13 @@ Règles impératives :
 - Chaque section : score /100 calibré (50 = moyenne du marché, 80+ = exceptionnel, ≤30 = défaillant),
   resume en une phrase percutante, analyse argumentée (150-250 mots), red_flags explicites
   (uniquement les VRAIS signaux d'alerte, liste vide sinon), sources (URLs consultées).
+- Chaque red flag porte une sévérité, classifiée avec rigueur car elle plafonne le score global :
+  "critical" = défaut fatal AUJOURD'HUI (scam, fonds utilisateurs en danger, insolvabilité) ;
+  "major" = altère matériellement la thèse d'investissement (unlock massif imminent, inflation > 20 %,
+  exploit récent avec pertes, équipe en fuite, perte structurelle de parts de marché) ;
+  "minor" = point de vigilance qui ne change pas la thèse (risque théorique, tension de gouvernance
+  résolue, événement passé sans impact opérationnel, métrique en léger déclin).
+  Un risque hypothétique ou déjà résorbé n'est JAMAIS "major".
 - Si une information est introuvable : score null et dis-le dans l'analyse. N'invente rien.
 - "token_utilite_capture" applique le test de capture de valeur : si le projet réussit, qu'est-ce
   qui force mécaniquement la valeur vers le détenteur du token ? Gouvernance seule = score ≤ 40.
@@ -118,6 +130,8 @@ ${quantRedFlags.length > 0 ? quantRedFlags.map((f) => `- [${f.severity}] ${f.lab
 
 ## Travail demandé
 Remplis le schéma JSON suivant après tes recherches web. Réponds UNIQUEMENT avec le JSON.
+Les "red_flags" de chaque section sont des objets { "severity": "critical"|"major"|"minor", "label": "..." }
+(liste vide s'il n'y a aucun vrai signal d'alerte).
 
 ${schemaSkeleton}`;
 }

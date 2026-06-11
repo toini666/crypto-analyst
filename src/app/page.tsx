@@ -7,12 +7,14 @@ import Link from "next/link";
 import Image from "next/image";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { deleteAnalysis } from "@/lib/api";
 import type { AnalysisRow } from "@/lib/types";
 import { PIPELINE_STEPS } from "@/lib/types";
 import { NewAnalysisForm } from "@/components/NewAnalysisForm";
 import { VerdictBadge } from "@/components/VerdictBadge";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { formatDateTime, scoreColor } from "@/lib/format";
 
 gsap.registerPlugin(useGSAP);
@@ -24,6 +26,9 @@ const LIST_COLUMNS =
 
 export default function DashboardPage() {
   const [rows, setRows] = useState<ListRow[] | null>(null);
+  const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const animatedOnce = useRef(false);
 
@@ -73,12 +78,26 @@ export default function DashboardPage() {
     { scope: listRef, dependencies: [rows] }
   );
 
-  async function onDelete(e: React.MouseEvent, id: string, name: string) {
+  function askDelete(e: React.MouseEvent, id: string, name: string) {
     e.preventDefault();
     e.stopPropagation();
-    if (!window.confirm(`Supprimer l'analyse de ${name} ?`)) return;
-    await deleteAnalysis(id);
-    setRows((prev) => prev?.filter((r) => r.id !== id) ?? null);
+    setDeleteError(null);
+    setToDelete({ id, name });
+  }
+
+  async function confirmDelete() {
+    if (!toDelete) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteAnalysis(toDelete.id);
+      setRows((prev) => prev?.filter((r) => r.id !== toDelete.id) ?? null);
+      setToDelete(null);
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "La suppression a échoué");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -160,22 +179,35 @@ export default function DashboardPage() {
                 </Link>
 
                 <button
-                  onClick={(e) => onDelete(e, row.id, row.token_name)}
+                  onClick={(e) => askDelete(e, row.id, row.token_name)}
                   aria-label={`Supprimer l'analyse de ${row.token_name}`}
                   className="mr-3 rounded p-1.5 text-faint opacity-0 transition-opacity duration-150 hover:text-danger focus-visible:opacity-100 group-hover:opacity-100"
                 >
-                  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden>
-                    <path
-                      d="M5.5 1a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4ZM3 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v.5h1a.5.5 0 0 1 0 1h-.55l-.7 8.4a1.5 1.5 0 0 1-1.5 1.38H4.75a1.5 1.5 0 0 1-1.5-1.38L2.55 5H2a.5.5 0 0 1 0-1h1v-.5Z"
-                      fill="currentColor"
-                    />
-                  </svg>
+                  <Trash2 className="size-4" strokeWidth={1.75} aria-hidden />
                 </button>
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      <ConfirmDialog
+        open={toDelete !== null}
+        title="Supprimer l'analyse ?"
+        description={
+          toDelete
+            ? `L'analyse de ${toDelete.name} et son rapport seront définitivement supprimés.`
+            : ""
+        }
+        confirmLabel="Supprimer l'analyse"
+        pendingLabel="Suppression…"
+        pending={deleting}
+        error={deleteError}
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          if (!deleting) setToDelete(null);
+        }}
+      />
     </div>
   );
 }

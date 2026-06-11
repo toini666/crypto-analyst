@@ -4,6 +4,7 @@
 // la preuve en dessous (rapport Markdown complet).
 
 import Image from "next/image";
+import { Download } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { AnalysisRow, RedFlag } from "@/lib/types";
@@ -122,8 +123,9 @@ export function ReportView({ row }: { row: AnalysisRow }) {
         <div className="mt-6 flex gap-3 border-t border-border pt-5">
           <button
             onClick={downloadMarkdown}
-            className="rounded-md border border-border px-4 py-2 text-sm text-ink transition-colors duration-150 hover:border-faint hover:bg-surface-2"
+            className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm text-ink transition-colors duration-150 hover:border-faint hover:bg-surface-2"
           >
+            <Download className="size-4" strokeWidth={1.75} aria-hidden />
             Télécharger le rapport (.md)
           </button>
         </div>
