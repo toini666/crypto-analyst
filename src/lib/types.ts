@@ -182,3 +182,95 @@ export const PIPELINE_STEPS = [
 ] as const;
 
 export type PipelineStepId = (typeof PIPELINE_STEPS)[number]["id"];
+
+/* ─────────────────────────── Portefeuille ───────────────────────────
+   Diagnostic « photo » d'un portefeuille (briefing-analyse-portefeuille.md).
+   Entrée = poche crypto uniquement (pondérations intra-crypto, §0.1). */
+
+/** Une ligne du portefeuille telle que saisie + persistée. */
+export interface PortfolioHolding {
+  id: string;
+  name: string;
+  ticker: string;
+  sector: string; // narratif (cf. PORTFOLIO_SECTORS)
+  amount: number; // montant en USD
+  position: number; // ordre de saisie
+}
+
+export interface Portfolio {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Données tirées d'une analyse de projet déjà réalisée, rattachée par ticker. */
+export interface LinkedAnalysis {
+  analysisId: string;
+  score: number | null;
+  verdict: Verdict | null;
+  redFlagCounts: { critical: number; major: number; minor: number };
+  marketCapRank: number | null;
+}
+
+/** Holding enrichi (en entrée du moteur) de l'analyse liée si elle existe. */
+export interface HoldingInput extends PortfolioHolding {
+  linked?: LinkedAnalysis | null;
+}
+
+export type PortfolioVerdict = "equilibre" | "corriger" | "risque";
+export type CheckStatus = "ok" | "warn" | "alert" | "na";
+
+/** Un critère diagnostiqué (une carte). verdict = 1 ligne ; redFlag = explicite ou null (RAS). */
+export interface PortfolioCheck {
+  id: string;
+  label: string;
+  status: CheckStatus;
+  verdict: string;
+  redFlag: string | null;
+  tier: "A" | "bonus";
+}
+
+export interface PortfolioRowResult {
+  id: string;
+  name: string;
+  ticker: string;
+  sector: string;
+  amount: number;
+  weight: number; // % du portefeuille
+  score: number | null; // depuis l'analyse liée
+  verdict: Verdict | null;
+  isBlueChip: boolean;
+}
+
+export interface SectorWeight {
+  sector: string;
+  weight: number;
+}
+
+export interface PortfolioSuggestion {
+  kind: "ok" | "warn" | "alert";
+  text: string;
+}
+
+/** Résultat complet du diagnostic, au format de sortie du briefing §4. */
+export interface PortfolioDiagnostic {
+  methodologyVersion: string;
+  total: number;
+  rows: PortfolioRowResult[];
+  sectors: SectorWeight[];
+  globalScore: number;
+  verdict: PortfolioVerdict;
+  verdictLabel: string;
+  checks: PortfolioCheck[];
+  strengths: string[];
+  coverage: number; // % du portefeuille couvert par une analyse
+  weightedQuality: number | null;
+  top: PortfolioRowResult | null;
+  topSector: SectorWeight | null;
+  avoid: PortfolioRowResult[];
+  avoidWeight: number;
+  flags: { critical: number; major: number; minor: number };
+  suggestions: PortfolioSuggestion[];
+  toVerify: string[];
+}

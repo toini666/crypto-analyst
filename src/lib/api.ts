@@ -1,6 +1,13 @@
 // Appels API côté client.
 
-import type { AnalysisEvent, AnalysisListRow, AnalysisRow } from "@/lib/types";
+import type {
+  AnalysisEvent,
+  AnalysisListRow,
+  AnalysisRow,
+  Portfolio,
+  PortfolioDiagnostic,
+  PortfolioHolding,
+} from "@/lib/types";
 
 export async function fetchAnalyses(): Promise<AnalysisListRow[]> {
   const res = await fetch("/api/analyses", { cache: "no-store" });
@@ -34,6 +41,61 @@ export async function launchAnalysis(tokenName: string, ticker: string): Promise
 
 export async function deleteAnalysis(id: string): Promise<void> {
   const res = await fetch(`/api/analyses/${id}`, { method: "DELETE" });
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    throw new Error(json.error ?? "La suppression a échoué");
+  }
+}
+
+/* ─────────────────────────── Portefeuille ─────────────────────────── */
+
+export interface PortfolioResponse {
+  portfolio: Portfolio;
+  holdings: PortfolioHolding[];
+  diagnostic: PortfolioDiagnostic;
+}
+
+export async function fetchPortfolio(): Promise<PortfolioResponse> {
+  const res = await fetch("/api/portfolio", { cache: "no-store" });
+  if (!res.ok) throw new Error("Chargement du portefeuille échoué");
+  return res.json();
+}
+
+export interface HoldingInputBody {
+  name: string;
+  ticker: string;
+  sector: string;
+  amount: number;
+}
+
+export async function addHolding(body: HoldingInputBody): Promise<string> {
+  const res = await fetch("/api/portfolio/holdings", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error ?? "L'ajout de la position a échoué");
+  return json.id as string;
+}
+
+export async function updateHolding(
+  id: string,
+  fields: Partial<HoldingInputBody>
+): Promise<void> {
+  const res = await fetch(`/api/portfolio/holdings/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(fields),
+  });
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    throw new Error(json.error ?? "La mise à jour a échoué");
+  }
+}
+
+export async function removeHolding(id: string): Promise<void> {
+  const res = await fetch(`/api/portfolio/holdings/${id}`, { method: "DELETE" });
   if (!res.ok) {
     const json = await res.json().catch(() => ({}));
     throw new Error(json.error ?? "La suppression a échoué");

@@ -9,17 +9,17 @@ export const VERDICT_META: Record<
   privilegier: {
     label: "À privilégier",
     color: "var(--color-success)",
-    bg: "oklch(0.72 0.17 150 / 0.12)",
+    bg: "rgba(87, 201, 139, 0.1)",
   },
   surveiller: {
     label: "À surveiller",
     color: "var(--color-accent)",
-    bg: "oklch(0.78 0.14 75 / 0.12)",
+    bg: "rgba(217, 161, 59, 0.1)",
   },
   eviter: {
     label: "À éviter",
     color: "var(--color-danger)",
-    bg: "oklch(0.64 0.19 25 / 0.12)",
+    bg: "rgba(226, 87, 75, 0.12)",
   },
 };
 

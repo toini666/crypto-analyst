@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Newsreader } from "next/font/google";
-import Link from "next/link";
+import { IBM_Plex_Sans, IBM_Plex_Mono, Newsreader } from "next/font/google";
+import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-ibm-plex-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 const newsreader = Newsreader({
@@ -32,22 +34,10 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} min-h-dvh antialiased`}
+        className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} ${newsreader.variable} min-h-dvh antialiased`}
       >
-        <header className="border-b border-border">
-          <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
-            <Link
-              href="/"
-              className="font-serif text-lg italic tracking-tight text-ink"
-            >
-              Crypto Analyst
-            </Link>
-            <span className="hidden font-mono text-xs text-faint sm:block">
-              due diligence · pipeline déterministe
-            </span>
-          </div>
-        </header>
-        <main className="mx-auto max-w-5xl px-6 pb-24 pt-10">{children}</main>
+        <SiteHeader />
+        {children}
       </body>
     </html>
   );

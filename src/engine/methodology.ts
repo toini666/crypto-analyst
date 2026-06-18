@@ -191,3 +191,55 @@ export function getPillar(id: PillarId): PillarDef {
   if (!p) throw new Error(`Pilier inconnu : ${id}`);
   return p;
 }
+
+/* ─────────────────────── Méthodologie portefeuille ───────────────────────
+   Diagnostic structurel d'une poche crypto (briefing-analyse-portefeuille.md).
+   Seuils = heuristiques Toini du §1.7 (fourchettes, pas des lois). Tier A
+   uniquement ; Tier B (métriques de risque sur historique) et Tier C
+   (recommandations live) sont différés. PROVISOIRE — à calibrer avec Antoine.
+
+   Toute modification des seuils/poids ci-dessous incrémente cette version. */
+export const PORTFOLIO_METHODOLOGY_VERSION = "0.1.0";
+
+export const PORTFOLIO = {
+  // §1.6/§1.3 — socle de qualité, exempté du plafond de concentration altcoin (piège #4).
+  blueChips: ["BTC", "ETH", "SOL"],
+  // §1.3 — tokens d'exchange (risque idiosyncratique : hack, réglementaire, désaffection).
+  exchangeTokens: ["BNB", "CRO", "BGB", "OKB", "KCS", "HT", "GT", "LEO"],
+  // §1.6 — narratifs spéculatifs (profil agressif à assumer).
+  speculativeSectors: ["Meme"],
+  // §1.1 — nombre de lignes.
+  lines: { greenMin: 10, greenMax: 20, orangeLow: 8, orangeHigh: 30 },
+  // §1.2 — poids minimal par ligne (en %).
+  minWeight: { floor: 1, noise: 0.5 },
+  // §1.3 — plafond par ligne pour un altcoin (hors blue chip), en %.
+  maxWeightAlt: { green: 3, tolerated: 5 },
+  // §1.3 — plafond pour un token d'exchange, en %.
+  exchangeCap: { green: 3, tolerated: 5 },
+  // §1.3 — microcap (hors top 200) : ≤ 1 %, appliqué seulement si le rang est connu.
+  microcapRankThreshold: 200,
+  microcapCap: 1,
+  // §1.5 — diversification par narratif (poids en %, nombre de narratifs).
+  narrative: { weightGreen: 30, weightOrange: 50, countGreenMin: 3, countGreenMax: 6 },
+  // §1.6 — exposition mémécoins (%) au-delà de laquelle on flague le profil agressif.
+  memeWarn: 20,
+  memeAlert: 40,
+  // §4 — barème de score (somme = 100).
+  scoreWeights: { structure: 30, concentration: 30, narratives: 20, base: 20 },
+  // §4 — bornes de verdict (sur 100).
+  verdictBounds: { equilibre: 70, corriger: 40 },
+} as const;
+
+/** Secteurs / narratifs proposés à la saisie (repris du projet Claude Design). */
+export const PORTFOLIO_SECTORS = [
+  "L1 / L2",
+  "DeFi — Lending",
+  "DeFi — Staking",
+  "DeFi — DEX",
+  "Infrastructure / Oracle",
+  "Meme",
+  "Stablecoin",
+  "RWA",
+  "Gaming / NFT",
+  "Autre",
+] as const;

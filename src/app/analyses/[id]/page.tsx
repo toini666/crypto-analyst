@@ -82,7 +82,7 @@ export default function AnalysisPage({ params }: { params: Promise<{ id: string 
     setDeleteError(null);
     try {
       await deleteAnalysis(row.id);
-      router.push("/");
+      router.push("/analyses");
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : "La suppression a échoué");
       setDeleting(false);
@@ -91,29 +91,29 @@ export default function AnalysisPage({ params }: { params: Promise<{ id: string 
 
   if (notFound) {
     return (
-      <div className="py-20 text-center">
+      <main className="mx-auto max-w-5xl px-6 py-20 text-center">
         <p className="text-muted">Cette analyse n&apos;existe pas (ou plus).</p>
-        <Link href="/" className="mt-3 inline-block text-sm text-primary underline underline-offset-4">
+        <Link href="/analyses" className="mt-3 inline-block text-sm text-primary underline underline-offset-4">
           Retour aux analyses
         </Link>
-      </div>
+      </main>
     );
   }
 
   if (!row) {
     return (
-      <div aria-busy className="space-y-4">
+      <main aria-busy className="mx-auto max-w-5xl space-y-4 px-6 pt-8">
         <div className="h-8 w-64 animate-pulse rounded bg-surface" />
         <div className="h-48 animate-pulse rounded-xl bg-surface" />
-      </div>
+      </main>
     );
   }
 
   return (
-    <div>
+    <main className="mx-auto max-w-5xl px-6 pb-28 pt-8">
       <nav className="mb-6">
         <Link
-          href="/"
+          href="/analyses"
           className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors duration-150 hover:text-ink"
         >
           <ArrowLeft className="size-4" strokeWidth={1.75} aria-hidden />
@@ -150,7 +150,7 @@ export default function AnalysisPage({ params }: { params: Promise<{ id: string 
           if (!deleting) setConfirmingDelete(false);
         }}
       />
-    </div>
+    </main>
   );
 }
 

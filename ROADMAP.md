@@ -2,11 +2,12 @@
 
 > Document de reprise entre sessions. Mettre à jour les cases et la section « Reprendre ici » en fin de chaque session de travail.
 
-## Reprendre ici (état au 11 juin 2026)
+## Reprendre ici (état au 18 juin 2026)
 
-- **Fait** : MVP complet et fonctionnel — pipeline 10 étapes, 6 piliers, red flags/vetos, dashboard temps réel, vue rapport. 3 analyses d'Aave validées end-to-end (verdict 55/100, plafonné par veto gouvernance). Méthodologie v1.1.0. Modale de confirmation au design system + icônes Lucide outline (retours design du 11/06).
+- **Fait (session 2, 18/06)** : (1) **Restyle « terminal »** sur toute l'app (repris de Claude Design) — palette ambre `#D9A13B` + IBM Plex Sans/Mono, tokens dans `globals.css`, `DESIGN.md` mis à jour. (2) **Landing** (`/`, hero « produit ») + **navigation** (`SiteHeader` : landing / Analyses / Portefeuille) ; dashboard déplacé sur `/analyses`. (3) **Analyse de portefeuille** (`/portfolio`) : diagnostic déterministe **Tier A** du briefing (`src/engine/portfolio.ts`, `PORTFOLIO_METHODOLOGY_VERSION = 0.1.0`), saisie persistée en SQLite (`portfolios` + `portfolio_holdings`), liaison aux analyses de projet existantes (qualité pondérée + risque, dégrade en n/d). Entrée = poche crypto uniquement (tranché avec Antoine, briefing §0.1).
+- **Fait** : MVP complet et fonctionnel — pipeline 10 étapes, 6 piliers, red flags/vetos, dashboard temps réel, vue rapport. 3 analyses d'Aave validées end-to-end (verdict 55/100, plafonné par veto gouvernance). Méthodologie v1.1.0.
 - **Lancement** : `./start.sh` (`pnpm dev` + ouvre le navigateur). Backend = **SQLite local** (`./data/app.db`, `better-sqlite3`, WAL ; progression par polling) — bascule depuis Supabase le 18/06/2026 (plan gratuit plafonné à 2 projets, déjà pris). Aucun Docker, aucune clé.
-- **Prochaine étape** : Phase 0 (hygiène, 30 min) puis Phase 1 (CoinGecko).
+- **Prochaine étape** : calibrer le scoring portefeuille (`0.1.0` provisoire) sur des portefeuilles réels ; **Tier B** (métriques de risque sur historique de prix) et **Tier C** (recommandations live + prix d'entrée) restent à faire. Côté projet : Phase 0 (hygiène) puis Phase 1 (CoinGecko).
 
 ---
 

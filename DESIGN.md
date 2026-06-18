@@ -2,37 +2,39 @@
 
 ## Theme
 
-Dark, unique (pas de mode clair) : l'outil s'utilise le soir, lumière ambiante faible, lecture longue. Surface near-black neutre (chroma 0) ; la personnalité vit dans le cobalt, la sérif éditoriale et les couleurs de verdict — jamais dans des fonds teintés.
+Dark, unique (pas de mode clair) : l'outil s'utilise le soir, lumière ambiante faible, lecture longue. Direction « terminal » (reprise du projet Claude Design) : surfaces near-black, la personnalité vit dans l'**ambre**, la sérif éditoriale et les couleurs de verdict — jamais dans des fonds teintés. Les tokens sont définis en hex dans `src/app/globals.css` (`@theme`) et propagés à tout l'UI par les utilitaires Tailwind.
 
-## Palette (OKLCH)
+## Palette
 
-| Rôle | Valeur | Usage |
+| Token Tailwind | Valeur | Usage |
 |---|---|---|
-| `--bg` | `oklch(0.11 0 0)` | fond de page |
-| `--surface` | `oklch(0.155 0 0)` | cartes, panneaux |
-| `--surface-2` | `oklch(0.19 0 0)` | éléments interactifs au repos, bordures épaisses |
-| `--border` | `oklch(0.26 0 0)` | bordures 1px |
-| `--ink` | `oklch(0.93 0.005 230)` | texte principal (≥ 7:1 sur bg) |
-| `--muted` | `oklch(0.70 0.008 230)` | texte secondaire (≥ 4.5:1 sur bg) |
-| `--faint` | `oklch(0.55 0.008 230)` | méta, timestamps (grands corps uniquement) |
-| `--primary` | `oklch(0.70 0.12 230)` | cobalt : actions, liens, sélection, info |
-| `--primary-ink` | `oklch(0.13 0.03 230)` | texte sur fond primary |
-| `--accent` | `oklch(0.78 0.14 75)` | ambre : « à surveiller », warnings |
-| `--success` | `oklch(0.72 0.17 150)` | « à privilégier », succès |
-| `--danger` | `oklch(0.64 0.19 25)` | « à éviter », red flags critiques, erreurs |
-| `--danger-ink` | `oklch(0.14 0.04 25)` | texte sur fond danger (boutons destructifs) |
+| `--color-bg` | `#0B0D11` | fond de page |
+| `--color-surface` | `#11141A` | cartes, panneaux |
+| `--color-sunken` | `#070809` | inputs, zones en creux, fonds de barres |
+| `--color-surface-2` | `#1A1E26` | éléments interactifs élevés |
+| `--color-border` | `#1F242E` | bordures 1px |
+| `--color-ink` | `#E8EAEE` | texte principal |
+| `--color-muted` | `#9AA3B2` | texte secondaire (≥ 4.5:1 sur bg) |
+| `--color-faint` | `#5C6470` | méta, timestamps |
+| `--color-primary` | `#D9A13B` | ambre : actions, liens, sélection, onglet actif |
+| `--color-primary-ink` | `#0B0D11` | texte sur fond primary |
+| `--color-primary-soft` | `rgba(217,161,59,.28)` | fond d'onglet actif, anneau de focus |
+| `--color-accent` | `#D9A13B` | « à surveiller », warnings (= ambre) |
+| `--color-success` | `#57C98B` | « à privilégier », succès |
+| `--color-danger` | `#E2574B` | « à éviter », red flags critiques, erreurs |
+| `--color-danger-ink` | `#0B0D11` | texte sur fond danger |
 
-Stratégie : **Restrained** — neutres purs + cobalt ≤ 10 % de la surface. Les couleurs de verdict (success/accent/danger) sont sémantiques, réservées aux scores, badges et red flags.
+Stratégie : **Restrained** — neutres + ambre comme unique couleur d'action. Les couleurs de verdict (success/accent/danger) sont sémantiques (scores, badges, red flags). Seuils de couleur de score : ≥ 70 success · 40–69 accent · < 40 danger (`scoreColor`, `src/lib/format.ts`).
 
 ## Typography
 
 | Famille | Rôle |
 |---|---|
-| **Newsreader** (sérif, next/font) | Titres du rapport et titres de pages ; italique pour les verdicts. Jamais dans les labels/boutons. |
-| **Geist Sans** | UI : navigation, labels, boutons, corps. |
-| **Geist Mono** | Chiffres, tickers, métriques, logs du pipeline — toujours `font-variant-numeric: tabular-nums`. |
+| **Newsreader** (sérif, next/font) | Titres du rapport ; italique pour les verdicts. Jamais dans les labels/boutons. |
+| **IBM Plex Sans** | UI : navigation, titres de pages, labels, boutons, corps. |
+| **IBM Plex Mono** | Chiffres, tickers, métriques, montants, logs du pipeline — toujours `tabular-nums`. |
 
-Échelle fixe (rem), ratio ~1.2 : 0.75 / 0.8125 / 0.875 / 1 / 1.25 / 1.5 / 1.875 / 2.25. Rapport : corps de lecture 1.0625rem Newsreader-adjacent (Geist), max 72ch.
+Échelle fixe (rem), ratio ~1.2 : 0.75 / 0.8125 / 0.875 / 1 / 1.25 / 1.5 / 1.875 / 2.25. Rapport : corps de lecture 1.0625rem, max 72ch.
 
 ## Icons
 
@@ -40,13 +42,15 @@ Stratégie : **Restrained** — neutres purs + cobalt ≤ 10 % de la surface. Le
 
 ## Components
 
+- **SiteHeader** : header persistant + navigation principale (`src/components/SiteHeader.tsx`). Logo → landing, onglets pilule « Analyses » / « Portefeuille » (actif = `usePathname`, fond `primary-soft` + texte ambre), badge « Méthodologie » à droite.
 - **AnalysisCard** : ligne de dossier (pas une carte décorative) — ticker mono, nom, score, badge verdict, date ; états hover/focus/running.
 - **VerdictBadge** : pilule sémantique (privilégier/surveiller/éviter) — fond saturé, texte near-white.
 - **ScoreDial** : jauge SVG circulaire du score global, balayage animé GSAP, couleur du verdict.
 - **PillarBars** : 6 barres horizontales (score + couverture de données), remplissage animé stagger.
 - **PipelineStepper** : étapes verticales avec états (à venir / en cours / ok / warn / erreur), flux d'événements mono en dessous.
 - **RedFlagsPanel** : table de sévérité, jamais adoucie (critique = danger plein).
-- **Report** : rendu Markdown éditorial (Newsreader pour h1-h3, tables denses Geist Mono).
+- **Report** : rendu Markdown éditorial (Newsreader pour h1-h3, tables denses IBM Plex Mono).
+- **Portefeuille** (`src/app/portfolio/page.tsx`) : colonne saisie (lignes éditables `$`, total, ajout avec select narratif) + résultat — `HealthSummary` (verdict + score /100), grille de `CriteriaCard` (un critère Tier A par carte : statut + verdict 1 ligne + red flag Lucide `Flag` ou RAS), `Répartition` (switcher Barres / Anneau conic-gradient / Treemap), diversification sectorielle, `RiskCard`, points forts (`Check`), à vérifier (`ClipboardList`), suggestions. Couleurs de secteur = palette stable de 8 teintes.
 - **ConfirmDialog** : `<dialog>` natif (top layer, focus trap, Échap) pour toute action destructive — jamais de `window.confirm`. Surface + bordure du système, backdrop `oklch(0 0 0 / 0.6)`, entrée 200 ms (`@starting-style`), bouton de confirmation `danger`/`danger-ink` libellé verbe + objet, annulation focusée par défaut.
 
 ## Motion (GSAP)
@@ -60,4 +64,4 @@ Stratégie : **Restrained** — neutres purs + cobalt ≤ 10 % de la surface. Le
 
 ## Layout
 
-App shell mono-colonne centrée (max-w-5xl) : pas de sidebar, l'outil n'a que deux écrans (liste, analyse). Header fin persistant avec le nom de l'outil et l'action « Nouvelle analyse ». Densité élevée dans les tables, respiration large autour du verdict.
+App shell centrée `max-w-[1240px]`, header fin persistant (`SiteHeader`) avec navigation à trois destinations : **landing** (`/`), **Analyses** (`/analyses` + `/analyses/[id]`), **Portefeuille** (`/portfolio`). Pas de sidebar. La landing et le portefeuille respirent en pleine largeur ; la **vue rapport** reste en colonne de lecture (`max-w-5xl`) — la lecture longue est le produit. Densité élevée dans les tables, respiration large autour du verdict. Chaque page porte son propre `<main>` (le layout ne fournit que le header).

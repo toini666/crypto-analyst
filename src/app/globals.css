@@ -1,24 +1,26 @@
 @import "tailwindcss";
 
-/* Design tokens — DESIGN.md. Dark unique, neutres purs (chroma 0),
-   la personnalité vit dans le cobalt, la sérif et les couleurs de verdict. */
+/* Design tokens — DESIGN.md. Dark unique « terminal » (repris de Claude Design) :
+   neutres near-black, la personnalité vit dans l'ambre, la sérif et les verdicts. */
 @theme {
-  --color-bg: oklch(0.11 0 0);
-  --color-surface: oklch(0.155 0 0);
-  --color-surface-2: oklch(0.19 0 0);
-  --color-border: oklch(0.26 0 0);
-  --color-ink: oklch(0.93 0.005 230);
-  --color-muted: oklch(0.7 0.008 230);
-  --color-faint: oklch(0.55 0.008 230);
-  --color-primary: oklch(0.7 0.12 230);
-  --color-primary-ink: oklch(0.13 0.03 230);
-  --color-accent: oklch(0.78 0.14 75);
-  --color-success: oklch(0.72 0.17 150);
-  --color-danger: oklch(0.64 0.19 25);
-  --color-danger-ink: oklch(0.14 0.04 25);
+  --color-bg: #0b0d11;
+  --color-surface: #11141a;
+  --color-sunken: #070809;
+  --color-surface-2: #1a1e26;
+  --color-border: #1f242e;
+  --color-ink: #e8eaee;
+  --color-muted: #9aa3b2;
+  --color-faint: #5c6470;
+  --color-primary: #d9a13b;
+  --color-primary-ink: #0b0d11;
+  --color-primary-soft: rgba(217, 161, 59, 0.28);
+  --color-accent: #d9a13b;
+  --color-success: #57c98b;
+  --color-danger: #e2574b;
+  --color-danger-ink: #0b0d11;
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  --font-sans: var(--font-ibm-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, "SF Mono", monospace;
   --font-serif: var(--font-newsreader), Georgia, serif;
 }
 
@@ -34,7 +36,7 @@ body {
 }
 
 ::selection {
-  background: oklch(0.7 0.12 230 / 0.35);
+  background: rgba(217, 161, 59, 0.3);
 }
 
 :focus-visible {
@@ -159,7 +161,7 @@ body:has(dialog.confirm-dialog[open]) {
   padding: 0.5rem 0.75rem 0.5rem 0;
 }
 .report tbody td {
-  border-bottom: 1px solid oklch(0.26 0 0 / 0.5);
+  border-bottom: 1px solid color-mix(in oklab, var(--color-border) 55%, transparent);
   padding: 0.5rem 0.75rem 0.5rem 0;
   vertical-align: top;
 }

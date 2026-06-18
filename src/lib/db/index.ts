@@ -8,7 +8,13 @@ import Database from "better-sqlite3";
 import { randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
-import type { AnalysisEvent, AnalysisListRow, AnalysisRow } from "@/lib/types";
+import type {
+  AnalysisEvent,
+  AnalysisListRow,
+  AnalysisRow,
+  Portfolio,
+  PortfolioHolding,
+} from "@/lib/types";
 
 const DB_PATH =
   process.env.DB_PATH ?? path.join(process.cwd(), "data", "app.db");
@@ -55,6 +61,26 @@ create table if not exists analysis_events (
 
 create index if not exists analysis_events_analysis_idx on analysis_events (analysis_id, id);
 create index if not exists analyses_created_idx on analyses (created_at desc);
+
+create table if not exists portfolios (
+  id text primary key,
+  name text not null,
+  created_at text not null,
+  updated_at text not null
+);
+
+create table if not exists portfolio_holdings (
+  id text primary key,
+  portfolio_id text not null references portfolios(id) on delete cascade,
+  name text not null,
+  ticker text not null,
+  sector text not null,
+  amount real not null default 0,
+  position integer not null default 0
+);
+
+create index if not exists portfolio_holdings_portfolio_idx
+  on portfolio_holdings (portfolio_id, position);
 `;
 
 // Connexion unique, mise en cache sur globalThis pour survivre au hot-reload de
@@ -180,4 +206,127 @@ export function listEvents(analysisId: string): AnalysisEvent[] {
   return getDb()
     .prepare("select * from analysis_events where analysis_id = ? order by id asc")
     .all(analysisId) as AnalysisEvent[];
+}
+
+/* ─────────────────────────── Portefeuille ───────────────────────────
+   App mono-utilisateur : un portefeuille « Portefeuille principal » par défaut,
+   seedé d'un exemple au premier lancement pour que la page ne soit pas vide. */
+
+const DEMO_HOLDINGS: Omit<PortfolioHolding, "id" | "position">[] = [
+  { name: "Ethereum", ticker: "ETH", sector: "L1 / L2", amount: 9000 },
+  { name: "Aave", ticker: "AAVE", sector: "DeFi — Lending", amount: 5200 },
+  { name: "Solana", ticker: "SOL", sector: "L1 / L2", amount: 3400 },
+  { name: "Lido", ticker: "LDO", sector: "DeFi — Staking", amount: 2100 },
+  { name: "GigaPaw", ticker: "GPAW", sector: "Meme", amount: 1800 },
+  { name: "Pyth Network", ticker: "PYTH", sector: "Infrastructure / Oracle", amount: 1500 },
+  { name: "dogwifhat", ticker: "WIF", sector: "Meme", amount: 1200 },
+];
+
+/** Renvoie le portefeuille par défaut, en le créant (+ seed) au premier appel. */
+export function getOrCreateDefaultPortfolio(): Portfolio {
+  const db = getDb();
+  const existing = db
+    .prepare("select * from portfolios order by created_at asc limit 1")
+    .get() as Portfolio | undefined;
+  if (existing) return existing;
+
+  const id = randomUUID();
+  const now = new Date().toISOString();
+  const create = db.transaction(() => {
+    db.prepare(
+      `insert into portfolios (id, name, created_at, updated_at)
+       values (@id, @name, @now, @now)`
+    ).run({ id, name: "Portefeuille principal", now });
+    const stmt = db.prepare(
+      `insert into portfolio_holdings (id, portfolio_id, name, ticker, sector, amount, position)
+       values (@id, @pid, @name, @ticker, @sector, @amount, @position)`
+    );
+    DEMO_HOLDINGS.forEach((h, i) =>
+      stmt.run({ id: randomUUID(), pid: id, position: i, ...h })
+    );
+  });
+  create();
+  return { id, name: "Portefeuille principal", created_at: now, updated_at: now };
+}
+
+export function listHoldings(portfolioId: string): PortfolioHolding[] {
+  return getDb()
+    .prepare(
+      "select * from portfolio_holdings where portfolio_id = ? order by position asc, rowid asc"
+    )
+    .all(portfolioId) as PortfolioHolding[];
+}
+
+export function addHolding(
+  portfolioId: string,
+  input: { name: string; ticker: string; sector: string; amount: number }
+): string {
+  const db = getDb();
+  const id = randomUUID();
+  const next =
+    (db
+      .prepare(
+        "select coalesce(max(position), -1) + 1 as n from portfolio_holdings where portfolio_id = ?"
+      )
+      .get(portfolioId) as { n: number }).n;
+  db.prepare(
+    `insert into portfolio_holdings (id, portfolio_id, name, ticker, sector, amount, position)
+     values (@id, @pid, @name, @ticker, @sector, @amount, @position)`
+  ).run({
+    id,
+    pid: portfolioId,
+    name: input.name,
+    ticker: input.ticker,
+    sector: input.sector,
+    amount: input.amount,
+    position: next,
+  });
+  touchPortfolio(portfolioId);
+  return id;
+}
+
+const HOLDING_PATCHABLE = new Set(["name", "ticker", "sector", "amount"]);
+
+export function updateHolding(
+  holdingId: string,
+  fields: Partial<Pick<PortfolioHolding, "name" | "ticker" | "sector" | "amount">>
+): void {
+  const keys = Object.keys(fields).filter((k) => HOLDING_PATCHABLE.has(k));
+  if (keys.length === 0) return;
+  const assignments = keys.map((k) => `${k} = @${k}`).join(", ");
+  const params: Record<string, unknown> = { id: holdingId };
+  for (const k of keys) params[k] = (fields as Record<string, unknown>)[k];
+  const db = getDb();
+  db.prepare(`update portfolio_holdings set ${assignments} where id = @id`).run(params);
+  const row = db
+    .prepare("select portfolio_id from portfolio_holdings where id = ?")
+    .get(holdingId) as { portfolio_id: string } | undefined;
+  if (row) touchPortfolio(row.portfolio_id);
+}
+
+export function removeHolding(holdingId: string): void {
+  const db = getDb();
+  const row = db
+    .prepare("select portfolio_id from portfolio_holdings where id = ?")
+    .get(holdingId) as { portfolio_id: string } | undefined;
+  db.prepare("delete from portfolio_holdings where id = ?").run(holdingId);
+  if (row) touchPortfolio(row.portfolio_id);
+}
+
+function touchPortfolio(portfolioId: string): void {
+  getDb()
+    .prepare("update portfolios set updated_at = ? where id = ?")
+    .run(new Date().toISOString(), portfolioId);
+}
+
+/** Dernière analyse terminée pour un ticker (insensible à la casse), pour la liaison. */
+export function findLatestCompletedByTicker(ticker: string): AnalysisRow | null {
+  const raw = getDb()
+    .prepare(
+      `select * from analyses
+       where upper(ticker) = upper(?) and status = 'completed'
+       order by created_at desc limit 1`
+    )
+    .get(ticker) as Record<string, unknown> | undefined;
+  return hydrate(raw);
 }
