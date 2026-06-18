@@ -15,12 +15,10 @@ async function main() {
     process.exit(1);
   }
 
-  const { createAdminClient } = await import("@/lib/supabase/admin");
   const { runPipeline } = await import("@/engine/pipeline");
 
-  const db = createAdminClient();
   console.log(`[runner] Démarrage de l'analyse ${analysisId}`);
-  await runPipeline(db, analysisId);
+  await runPipeline(analysisId);
   console.log(`[runner] Analyse ${analysisId} terminée`);
 }
 

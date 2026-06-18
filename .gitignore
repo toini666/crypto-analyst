@@ -40,3 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 logs/
+
+# base de données locale (SQLite + fichiers WAL/SHM)
+/data

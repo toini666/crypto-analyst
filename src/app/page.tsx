@@ -8,9 +8,8 @@ import Image from "next/image";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Trash2 } from "lucide-react";
-import { supabase } from "@/lib/supabase/client";
-import { deleteAnalysis } from "@/lib/api";
-import type { AnalysisRow } from "@/lib/types";
+import { deleteAnalysis, fetchAnalyses } from "@/lib/api";
+import type { AnalysisListRow } from "@/lib/types";
 import { PIPELINE_STEPS } from "@/lib/types";
 import { NewAnalysisForm } from "@/components/NewAnalysisForm";
 import { VerdictBadge } from "@/components/VerdictBadge";
@@ -19,13 +18,11 @@ import { formatDateTime, scoreColor } from "@/lib/format";
 
 gsap.registerPlugin(useGSAP);
 
-type ListRow = Omit<AnalysisRow, "metrics" | "raw_data" | "report_md" | "pillar_scores" | "red_flags">;
-
-const LIST_COLUMNS =
-  "id,created_at,updated_at,token_name,ticker,coingecko_id,token_image,status,current_step,progress,error,methodology_version,global_score,verdict,confidence";
+// Pas de Realtime (backend SQLite local) : on rafraîchit la liste par polling.
+const POLL_MS = 2500;
 
 export default function DashboardPage() {
-  const [rows, setRows] = useState<ListRow[] | null>(null);
+  const [rows, setRows] = useState<AnalysisListRow[] | null>(null);
   const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -36,26 +33,19 @@ export default function DashboardPage() {
     let cancelled = false;
 
     async function load() {
-      const { data } = await supabase
-        .from("analyses")
-        .select(LIST_COLUMNS)
-        .order("created_at", { ascending: false });
-      if (!cancelled) setRows((data as ListRow[]) ?? []);
+      try {
+        const data = await fetchAnalyses();
+        if (!cancelled) setRows(data);
+      } catch {
+        if (!cancelled) setRows((prev) => prev ?? []);
+      }
     }
     load();
-
-    const channel = supabase
-      .channel("analyses-list")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "analyses" },
-        () => load()
-      )
-      .subscribe();
+    const timer = setInterval(load, POLL_MS);
 
     return () => {
       cancelled = true;
-      supabase.removeChannel(channel);
+      clearInterval(timer);
     };
   }, []);
 
@@ -212,7 +202,7 @@ export default function DashboardPage() {
   );
 }
 
-function RowStatus({ row }: { row: ListRow }) {
+function RowStatus({ row }: { row: AnalysisListRow }) {
   if (row.status === "completed" && row.verdict) {
     return (
       <div className="flex shrink-0 items-center gap-3">

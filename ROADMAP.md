@@ -5,7 +5,7 @@
 ## Reprendre ici (état au 11 juin 2026)
 
 - **Fait** : MVP complet et fonctionnel — pipeline 10 étapes, 6 piliers, red flags/vetos, dashboard temps réel, vue rapport. 3 analyses d'Aave validées end-to-end (verdict 55/100, plafonné par veto gouvernance). Méthodologie v1.1.0. Modale de confirmation au design system + icônes Lucide outline (retours design du 11/06).
-- **Lancement** : `./start.sh` (démarre Supabase local si besoin, puis `pnpm dev`, ouvre le navigateur).
+- **Lancement** : `./start.sh` (`pnpm dev` + ouvre le navigateur). Backend = **SQLite local** (`./data/app.db`, `better-sqlite3`, WAL ; progression par polling) — bascule depuis Supabase le 18/06/2026 (plan gratuit plafonné à 2 projets, déjà pris). Aucun Docker, aucune clé.
 - **Prochaine étape** : Phase 0 (hygiène, 30 min) puis Phase 1 (CoinGecko).
 
 ---

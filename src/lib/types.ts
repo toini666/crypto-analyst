@@ -152,6 +152,12 @@ export interface AnalysisRow {
   report_md: string | null;
 }
 
+/** Ligne de liste (dashboard) : sans les gros champs JSON ni le rapport. */
+export type AnalysisListRow = Omit<
+  AnalysisRow,
+  "metrics" | "raw_data" | "report_md" | "pillar_scores" | "red_flags"
+>;
+
 export interface AnalysisEvent {
   id: number;
   analysis_id: string;

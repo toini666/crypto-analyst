@@ -9,14 +9,16 @@ import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ArrowLeft, RotateCcw, Trash2 } from "lucide-react";
-import { supabase } from "@/lib/supabase/client";
-import { deleteAnalysis, launchAnalysis } from "@/lib/api";
+import { deleteAnalysis, fetchAnalysis, launchAnalysis } from "@/lib/api";
 import type { AnalysisEvent, AnalysisRow } from "@/lib/types";
 import { PipelineStepper } from "@/components/PipelineStepper";
 import { ReportView } from "@/components/ReportView";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 gsap.registerPlugin(useGSAP);
+
+// Pas de Realtime (backend SQLite local) : polling tant que l'analyse tourne.
+const POLL_MS = 1500;
 
 export default function AnalysisPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -30,48 +32,41 @@ export default function AnalysisPage({ params }: { params: Promise<{ id: string 
 
   useEffect(() => {
     let cancelled = false;
+    let timer: ReturnType<typeof setInterval> | null = null;
+
+    function stop() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
 
     async function load() {
-      const [{ data: analysis }, { data: evts }] = await Promise.all([
-        supabase.from("analyses").select("*").eq("id", id).maybeSingle(),
-        supabase
-          .from("analysis_events")
-          .select("*")
-          .eq("analysis_id", id)
-          .order("id", { ascending: true }),
-      ]);
+      let detail;
+      try {
+        detail = await fetchAnalysis(id);
+      } catch {
+        return; // erreur transitoire : on retentera au prochain tick
+      }
       if (cancelled) return;
-      if (!analysis) {
+      if (!detail) {
         setNotFound(true);
+        stop();
         return;
       }
-      setRow(analysis as AnalysisRow);
-      setEvents((evts as AnalysisEvent[]) ?? []);
+      setRow(detail.analysis);
+      setEvents(detail.events);
+      // Une fois l'analyse figée, plus rien à rafraîchir.
+      if (detail.analysis.status === "completed" || detail.analysis.status === "failed") {
+        stop();
+      }
     }
     load();
-
-    const channel = supabase
-      .channel(`analysis-${id}`)
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "analyses", filter: `id=eq.${id}` },
-        (payload) => setRow(payload.new as AnalysisRow)
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "analysis_events",
-          filter: `analysis_id=eq.${id}`,
-        },
-        (payload) => setEvents((prev) => [...prev, payload.new as AnalysisEvent])
-      )
-      .subscribe();
+    timer = setInterval(load, POLL_MS);
 
     return () => {
       cancelled = true;
-      supabase.removeChannel(channel);
+      stop();
     };
   }, [id]);
 

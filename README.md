@@ -13,18 +13,17 @@ Méthodologie complète : [CADRAGE.md](CADRAGE.md) · Design : [PRODUCT.md](PROD
 
 ## Prérequis
 
-- Node ≥ 22, pnpm, Docker (pour Supabase local), Supabase CLI
+- Node ≥ 22, pnpm
 - Claude Code installé et connecté (`claude` dans le PATH) — utilisé en headless pour la phase qualitative, sans clé API externe
+
+Le backend est une base **SQLite locale** (`./data/app.db`, via `better-sqlite3`) créée automatiquement au premier lancement : **aucun serveur, aucun Docker, aucune clé** à configurer.
 
 ## Démarrage
 
 ```bash
-# 1. Supabase local (la première fois : télécharge les images Docker)
-supabase start
-
-# 2. Dépendances + serveur
 pnpm install
 pnpm dev
+# ou tout-en-un : ./start.sh
 ```
 
 Ouvrir <http://localhost:3000>, saisir un nom + ticker, lancer. Comptez 5 à 15 minutes par analyse (la phase qualitative Claude fait de la vraie recherche web). La progression est visible en temps réel ; on peut quitter la page, le runner est un processus détaché (logs dans `logs/<id>.log`).
@@ -37,10 +36,11 @@ pnpm analyze <analysisId>   # relance le pipeline d'une ligne existante
 
 ## Configuration (`.env.local`)
 
+Toutes les variables sont **optionnelles** (le backend SQLite ne demande aucune config) :
+
 | Variable | Rôle |
 |---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase local (clés de dev par défaut, déjà en place) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Écritures du runner et des API routes |
+| `DB_PATH` | Optionnel — chemin du fichier SQLite (défaut : `./data/app.db`) |
 | `CLAUDE_QUAL_MODEL` | Modèle de la phase qualitative (`sonnet` par défaut : bon rapport vitesse/qualité) |
 | `COINGECKO_API_KEY` | Optionnel — clé **Demo gratuite** CoinGecko, fiabilise le rate limit |
 | `GITHUB_TOKEN` | Optionnel — élève la limite GitHub de 60 à 5000 req/h |
@@ -72,12 +72,12 @@ src/
 │   ├── scoring.ts            # scores par pilier + vetos + verdict + confiance
 │   ├── qualitative.ts        # claude -p headless (JSON strict validé par zod)
 │   └── report.ts             # assemblage du rapport Markdown
-└── lib/                      # types partagés, clients Supabase, formats
+└── lib/                      # types partagés, accès SQLite (lib/db), formats
 scripts/run-analysis.ts       # runner détaché (spawné par l'API route)
-supabase/migrations/          # schéma : analyses, analysis_events (+ Realtime)
+data/app.db                   # base SQLite locale (gitignorée, créée au 1er lancement)
 ```
 
-Le frontend lit Supabase avec la clé anon (RLS lecture seule) et s'abonne au Realtime pour la progression ; toutes les écritures passent par le service role (API routes + runner).
+Schéma : tables `analyses` et `analysis_events`, créées au démarrage par `src/lib/db/`. Le frontend lit via les routes API (`GET /api/analyses`, `GET /api/analyses/[id]`) et **rafraîchit par polling** pendant qu'une analyse tourne ; les écritures passent par le runner détaché et les routes API.
 
 ## Scoring (méthodologie v1.0.0)
 

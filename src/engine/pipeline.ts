@@ -1,7 +1,11 @@
 // Orchestrateur du pipeline d'analyse — exécution déterministe des étapes
-// (PIPELINE_STEPS), progression et événements écrits dans Supabase en continu.
+// (PIPELINE_STEPS), progression et événements écrits dans SQLite en continu.
 
-import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  getAnalysis,
+  insertEvent,
+  patchAnalysis,
+} from "@/lib/db";
 import type { Metrics, PipelineStepId, QualitativeResult } from "@/lib/types";
 import { PIPELINE_STEPS } from "@/lib/types";
 import { searchCoin, getCoin, type CoinGeckoCoin } from "./fetchers/coingecko";
@@ -18,39 +22,31 @@ import { METHODOLOGY_VERSION } from "./methodology";
 type EventLevel = "info" | "warn" | "error" | "success";
 
 class Reporter {
-  constructor(
-    private db: SupabaseClient,
-    private analysisId: string
-  ) {}
+  constructor(private analysisId: string) {}
 
-  async step(stepId: PipelineStepId) {
+  step(stepId: PipelineStepId) {
     const step = PIPELINE_STEPS.find((s) => s.id === stepId)!;
-    await this.db
-      .from("analyses")
-      .update({ status: "running", current_step: stepId, progress: step.progress })
-      .eq("id", this.analysisId);
+    patchAnalysis(this.analysisId, {
+      status: "running",
+      current_step: stepId,
+      progress: step.progress,
+    });
   }
 
-  async event(step: string, message: string, level: EventLevel = "info") {
-    await this.db
-      .from("analysis_events")
-      .insert({ analysis_id: this.analysisId, step, level, message });
+  event(step: string, message: string, level: EventLevel = "info") {
+    insertEvent({ analysis_id: this.analysisId, step, level, message });
   }
 
-  async patch(fields: Record<string, unknown>) {
-    await this.db.from("analyses").update(fields).eq("id", this.analysisId);
+  patch(fields: Record<string, unknown>) {
+    patchAnalysis(this.analysisId, fields);
   }
 }
 
-export async function runPipeline(db: SupabaseClient, analysisId: string): Promise<void> {
-  const r = new Reporter(db, analysisId);
+export async function runPipeline(analysisId: string): Promise<void> {
+  const r = new Reporter(analysisId);
 
-  const { data: analysis, error: loadError } = await db
-    .from("analyses")
-    .select("*")
-    .eq("id", analysisId)
-    .single();
-  if (loadError || !analysis) throw new Error(`Analyse ${analysisId} introuvable`);
+  const analysis = getAnalysis(analysisId);
+  if (!analysis) throw new Error(`Analyse ${analysisId} introuvable`);
 
   try {
     // 1 — Résolution du token
