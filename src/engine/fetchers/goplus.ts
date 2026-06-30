@@ -106,12 +106,15 @@ export async function getTokenSecurity(
   if (!r) return { ...EMPTY, reason: "Contrat inconnu de GoPlus" };
 
   // Top 10 holders : on exclut les contrats (pools, staking, treasury lockée)
-  // pour approcher la concentration réellement « dumpable ».
+  // pour approcher la concentration réellement « dumpable ». GoPlus renvoie
+  // `percent` en fraction (0.20 = 20 %) → on convertit en pourcentage (0-100),
+  // unité attendue par les consommateurs (redflags > 40, scoring /100, rapport).
   const holders = (r.holders as GoPlusHolder[] | undefined) ?? [];
-  const top10 = holders
-    .filter((h) => h.is_contract !== 1 && h.is_locked !== 1)
-    .slice(0, 10)
-    .reduce((s, h) => s + (num(h.percent) ?? 0), 0);
+  const top10 =
+    holders
+      .filter((h) => h.is_contract !== 1 && h.is_locked !== 1)
+      .slice(0, 10)
+      .reduce((s, h) => s + (num(h.percent) ?? 0), 0) * 100;
 
   return {
     available: true,

@@ -20,8 +20,18 @@ export function detectQuantRedFlags(metrics: Metrics, security: GoPlusData): Red
       flags.push(make("HONEYPOT", "GoPlus signale is_honeypot=1", "GoPlus"));
     if (security.isOpenSource === false)
       flags.push(make("NOT_OPEN_SOURCE", "Code source du contrat non vérifié", "GoPlus"));
-    if (security.isMintable === true && security.hiddenOwner === true)
-      flags.push(make("HIDDEN_MINT", "Contrat mintable avec propriétaire caché", "GoPlus"));
+    // Mint + owner « caché » seul = faux positif fréquent (tokens bridgés/NTT,
+    // gouvernance) : on n'alerte que si un vrai signal de danger l'accompagne.
+    if (
+      security.isMintable === true &&
+      security.hiddenOwner === true &&
+      (security.isOpenSource === false ||
+        security.canTakeBackOwnership === true ||
+        security.isHoneypot === true)
+    )
+      flags.push(
+        make("HIDDEN_MINT", "Contrat mintable avec propriétaire caché et signal de danger associé", "GoPlus")
+      );
     const maxTax = Math.max(metrics.buyTaxPct ?? 0, metrics.sellTaxPct ?? 0);
     if (maxTax > 10)
       flags.push(make("EXTREME_TAX", `Taxe max ${maxTax.toFixed(1)} %`, "GoPlus"));
@@ -51,20 +61,9 @@ export function detectQuantRedFlags(metrics: Metrics, security: GoPlusData): Red
         `MC/FDV = ${metrics.mcFdvRatio.toFixed(2)} : ${(100 - metrics.mcFdvRatio * 100).toFixed(0)} % de la valorisation reste à émettre`,
         "CoinGecko")
     );
-  if (metrics.volumeMcRatio != null && metrics.volumeMcRatio < 0.05)
-    flags.push(
-      make("DEAD_VOLUME", `Volume/MC = ${(metrics.volumeMcRatio * 100).toFixed(1)} %`, "CoinGecko")
-    );
 
   // — Mineurs —
-  if (
-    metrics.volumeMcRatio != null &&
-    metrics.volumeMcRatio >= 0.05 &&
-    metrics.volumeMcRatio < 0.1
-  )
-    flags.push(
-      make("LOW_VOLUME", `Volume/MC = ${(metrics.volumeMcRatio * 100).toFixed(1)} %`, "CoinGecko")
-    );
+  // Le volume (court terme, variable d'un jour à l'autre) n'est plus un red flag.
   if (metrics.githubLastCommitDaysAgo != null && metrics.githubLastCommitDaysAgo > 90)
     flags.push(
       make("STALE_GITHUB", `Dernier commit il y a ${metrics.githubLastCommitDaysAgo} jours`, "GitHub")

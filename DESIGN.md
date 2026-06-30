@@ -46,10 +46,12 @@ Stratégie : **Restrained** — neutres + ambre comme unique couleur d'action. L
 - **AnalysisCard** : ligne de dossier (pas une carte décorative) — ticker mono, nom, score, badge verdict, date ; états hover/focus/running.
 - **VerdictBadge** : pilule sémantique (privilégier/surveiller/éviter) — fond saturé, texte near-white.
 - **ScoreDial** : jauge SVG circulaire du score global, balayage animé GSAP, couleur du verdict.
-- **PillarBars** : 6 barres horizontales (score + couverture de données), remplissage animé stagger.
+- **ScoreBar** : barre de score horizontale avec repères aux seuils 40/70 ; remplissage animé (stagger) dans la vue d'ensemble, statique ailleurs.
+- **Disclosure** : section dépliable contrôlée (bouton + région `aria-controls`), hauteur animée GSAP, `prefers-reduced-motion` = bascule instantanée.
 - **PipelineStepper** : étapes verticales avec états (à venir / en cours / ok / warn / erreur), flux d'événements mono en dessous.
-- **RedFlagsPanel** : table de sévérité, jamais adoucie (critique = danger plein).
-- **Report** : rendu Markdown éditorial (Newsreader pour h1-h3, tables denses IBM Plex Mono).
+- **ReportView** (`src/components/ReportView.tsx`) : vue rapport structurée — construite depuis les données (`pillar_scores`, `metrics`, `red_flags`, `raw_data.qualitative`), **sans rendu Markdown** (le `.md` reste téléchargeable). Du verdict en un coup d'œil à la preuve : hero (ScoreDial + verdict + bannière de pénalité red flags / garde-fou « contrat » + red flags) → vue d'ensemble des 6 piliers (grille de cartes) → chiffres clés → l'essentiel (description, thèse, forces/faiblesses — bordures pleines + fond teinté + icône Lucide, **jamais de bande latérale**) → red flags (état vide soigné ou table de sévérité, jamais adoucie) → `PillarDetail` → déclencheurs → `RawDataAnnex`.
+- **PillarDetail** : « le détail des 6 piliers » — une ligne `Disclosure` par pilier (replié = repère scannable ; déplié = composants, constats déterministes / analyses qualitatives sourcées, table comparables). Contrôle « tout déplier / replier ».
+- **RawDataAnnex** : annexe « données brutes » repliée par défaut — grille de métriques par source, horodatage, `n/d` explicite (jamais estimé), disclaimer.
 - **Portefeuille** (`src/app/portfolio/page.tsx`) : colonne saisie (lignes éditables `$`, total, ajout avec select narratif) + résultat — `HealthSummary` (verdict + score /100), grille de `CriteriaCard` (un critère Tier A par carte : statut + verdict 1 ligne + red flag Lucide `Flag` ou RAS), `Répartition` (switcher Barres / Anneau conic-gradient / Treemap), diversification sectorielle, `RiskCard`, points forts (`Check`), à vérifier (`ClipboardList`), suggestions. Couleurs de secteur = palette stable de 8 teintes.
 - **ConfirmDialog** : `<dialog>` natif (top layer, focus trap, Échap) pour toute action destructive — jamais de `window.confirm`. Surface + bordure du système, backdrop `oklch(0 0 0 / 0.6)`, entrée 200 ms (`@starting-style`), bouton de confirmation `danger`/`danger-ink` libellé verbe + objet, annulation focusée par défaut.
 
@@ -57,11 +59,12 @@ Stratégie : **Restrained** — neutres + ambre comme unique couleur d'action. L
 
 - Page de progression : la seule chorégraphie riche — étapes qui s'allument, log qui défile, pourcentage compté (`gsap.to` + textContent snap).
 - ScoreDial : balayage d'arc 0→score, ease `power3.out`, 0.9 s, une seule fois.
-- PillarBars : stagger 60 ms, scaleX origin-left.
+- Vue rapport : entrée des sections (fade + y 12 px, stagger) et remplissage des barres de la vue d'ensemble (scaleX origin-left, stagger) à l'arrivée des données.
+- Disclosure (détail des piliers, annexe) : hauteur animée à l'ouverture/fermeture (`power2`, ~0,3 s), `gsap.killTweensOf` sur toggles rapides.
 - Listes : entrée fade+y(8px) stagger 40 ms à l'arrivée des données.
 - Tout le reste : transitions CSS 150-250 ms, `ease-out`.
 - `prefers-reduced-motion` : remplacement par opacité instantanée (gsap.matchMedia).
 
 ## Layout
 
-App shell centrée `max-w-[1240px]`, header fin persistant (`SiteHeader`) avec navigation à trois destinations : **landing** (`/`), **Analyses** (`/analyses` + `/analyses/[id]`), **Portefeuille** (`/portfolio`). Pas de sidebar. La landing et le portefeuille respirent en pleine largeur ; la **vue rapport** reste en colonne de lecture (`max-w-5xl`) — la lecture longue est le produit. Densité élevée dans les tables, respiration large autour du verdict. Chaque page porte son propre `<main>` (le layout ne fournit que le header).
+App shell centrée `max-w-[1240px]`, header fin persistant (`SiteHeader`) avec navigation à trois destinations : **landing** (`/`), **Analyses** (`/analyses` + `/analyses/[id]`), **Portefeuille** (`/portfolio`). Pas de sidebar. La landing et le portefeuille respirent en pleine largeur ; la **vue rapport complétée** respire aussi en pleine largeur (`max-w-[1240px]`) pour ses grilles scannables (piliers, chiffres clés, annexe), tout en gardant la prose à une mesure lisible (~68-72ch). Les vues progression / échec restent en colonne étroite (`max-w-5xl`). Densité élevée dans les tables, respiration large autour du verdict. Chaque page porte son propre `<main>` (le layout ne fournit que le header).

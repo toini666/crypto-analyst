@@ -71,7 +71,7 @@ Deux sous-tests utiles :
 
 70 à 80 % des nouveaux tokens ne maintiennent ni volume ni activité de développement au-delà de leur première année. Le downside typique d'un mauvais choix est -90 à -100 % ; l'upside d'un bon choix est rarement symétrique en probabilité.
 
-Conséquence méthodologique : **une analyse de qualité est d'abord un filtre d'élimination, ensuite seulement un outil de classement**. La détection de red flags a plus de valeur espérée que la détection d'upside. C'est pourquoi le framework cible (§5) introduit des **vetos** : certains signaux plafonnent le score global quel que soit le reste (une moyenne pondérée peut masquer un défaut fatal — 90/100 en "social" ne compense pas un contrat non vérifié avec fonction de mint cachée).
+Conséquence méthodologique : **une analyse de qualité est d'abord un filtre d'élimination, ensuite seulement un outil de classement**. La détection de red flags a plus de valeur espérée que la détection d'upside. C'est pourquoi le framework cible (§5) fait **peser les red flags directement sur le score** : chaque signal abaisse le pilier d'où il vient, de sorte qu'une moyenne pondérée ne peut plus masquer un défaut fatal (90/100 en "social" ne compense pas un contrat non vérifié avec mint caché) — et un signal de scam contrat objectif borne le verdict à « à surveiller ».
 
 ### 2.4 Les huit propriétés d'une analyse de qualité
 
@@ -176,7 +176,7 @@ Red flags contractuels canoniques : contrat non vérifié, proxy upgradeable san
 | Limite | Correction proposée |
 |---|---|
 | **Pas de pilier sécurité** (audits, admin keys, honeypot, concentration) — la dimension cybersécurité/auditabilité d'EY est absente | Ajouter un pilier Sécurité + une phase de screening éliminatoire en amont (niveau 0 de la pyramide) |
-| **Moyenne pondérée pure** : un défaut fatal peut être masqué par les autres scores | Système de **vetos/plafonds** (§5.3) |
+| **Moyenne pondérée pure** : un défaut fatal peut être masqué par les autres scores | Système de **pénalités de pilier + garde-fou contrat** (§5.3) |
 | **Pondération uniforme 5×20 %** : "Technique" pèse autant que les fondamentaux dans une analyse... fondamentale | Pondérations différenciées + adaptées au profil (§5.1) |
 | **Aucune gestion de la fraîcheur/confiance des données** : un prompt ne garantit rien sur la qualité des chiffres | Données récupérées par API, horodatées, avec niveau de confiance par section |
 | **Pas de persistance ni de comparabilité** : chaque analyse est jetable | Historisation des scores et rapports (feature produit) |
@@ -192,7 +192,7 @@ Synthèse des trois sources : pyramide socratique (§2) × piliers EY (§3.2) ×
 
 ### 5.0 Phase 0 — Screening éliminatoire (avant tout scoring)
 
-Checklist binaire exécutée en premier ; tout échec critique stoppe l'analyse ou plafonne le score :
+Checklist binaire exécutée en premier ; un signal négatif pénalise le pilier concerné (et, pour un signal contrat objectif, borne le verdict à « à surveiller ») :
 
 - [ ] Contrat vérifié sur l'explorateur de référence
 - [ ] Pas de honeypot (simulation GoPlus / Honeypot.is)
@@ -200,7 +200,6 @@ Checklist binaire exécutée en premier ; tout échec critique stoppe l'analyse 
 - [ ] Liquidité suffisante et lockée (ou token coté sur exchanges majeurs)
 - [ ] Top 10 holders hors contrats/treasury < seuil (~30-40 % selon le secteur)
 - [ ] Équipe identifiable OU track record vérifiable (anonymat = malus, pas veto)
-- [ ] Volume/MC ≥ 10 % (filtre "token mort" de Toini)
 
 ### 5.1 Les six piliers et pondérations
 
@@ -209,7 +208,7 @@ Checklist binaire exécutée en premier ; tout échec critique stoppe l'analyse 
 | **1. Fondamentaux** | 20 % | Problème/solution, nécessité blockchain, équipe, investisseurs, partenariats, exécution roadmap, runway/trésorerie | Toini §1 + EY réputationnel/stratégique |
 | **2. Tokenomics & capture de valeur** | 25 % | Supply, inflation, unlocks, distribution, utilité, test de capture de valeur, incitations achat/détention | Toini §4.3-4.4, renforcé §2.2 |
 | **3. Traction & adoption on-chain** | 20 % | TVL/MC, revenus organiques vs incentivés, holders, métriques du narratif, croissance | Toini §4.1-4.2 |
-| **4. Marché & valorisation** | 15 % | MC/FDV vs comparables, multiples (P/F, P/S), position vs ATH, structure de prix, momentum volumes | Toini §3 + méthodes §3.5 |
+| **4. Marché & valorisation** | 15 % | Multiples de revenus (P/S) + valorisation vs comparables. Position vs ATH et Volume/MC restent **affichés** mais ne sont plus scorés (court terme/bruité, v2.0.0) | Toini §3 + méthodes §3.5 |
 | **5. Social & mindshare** | 10 % | Tendances 7j/30j, qualité d'engagement (pas vanité), activité GitHub, classements sociaux | Toini §2 |
 | **6. Sécurité & risques** | 10 % | Audits et résolution des findings, centralisation technique, risques légaux/réglementaires | EY technique/cyber/audit — **nouveau** |
 
@@ -228,24 +227,34 @@ Chaque métrique = valeur actuelle + évolution 30j + benchmark sectoriel + sour
 - **Social/Dev** (LunarCrush/Santiment, GitHub API) : Galaxy Score ou équivalent, croissance followers 7j/30j, commits & contributeurs 90j, sentiment
 - **Valorisation** : multiples vs 2-3 comparables du même narratif, NVT/MVRV si disponibles, retracement Fibonacci depuis ATH
 
-### 5.3 Scoring : moyenne pondérée + système de vetos
+### 5.3 Scoring : pénalités de red flags par pilier
+
+> **Mise à jour v2.0.0 (30/06/2026)** : les plafonds durs initiaux (red flag
+> critique → 20, majeur → 55) écrasaient systématiquement les scores (un seul
+> majeur collait à 55). Ils sont remplacés par des **pénalités imputées au pilier
+> d'origine** du red flag — un défaut n'est plus masqué par la moyenne (il abaisse
+> directement son pilier), sans pour autant « tomber d'office » à un palier.
 
 ```
-score_global = Σ (score_pilier × poids)            — base Toini
-PUIS application des plafonds :
-  - red flag CRITIQUE (honeypot, mint caché, liquidité non lockée…) → score plafonné à 20 ("À éviter")
-  - red flag MAJEUR (unlock > X % MC sous 90j, top10 > 40 %, audit absent
-    sur protocole à TVL, inflation > 20 %…) → score plafonné à 55 ("À surveiller")
-  - données critiques manquantes → plafond de confiance affiché, jamais compensé
+score_pilier = moyenne pondérée des composants
+             − pénalité des red flags du pilier
+               (critical −40, major −14, minor −3 ; cumul en √n ; plancher 0)
+score_global = Σ (score_pilier × poids)            — aucun plafond ni plancher
+PUIS, seule exception de type « plafond » :
+  - red flag CRITICAL « contrat » objectif (honeypot, contrat non vérifié,
+    taxe extrême — HIDDEN_MINT exclu : faux positif fréquent sur tokens
+    bridgés/NTT) → score plafonné à 69 : verdict « à surveiller » au minimum,
+    jamais « à privilégier ».
+  - données critiques manquantes → niveau de confiance dégradé, jamais compensé
 ```
 
 Verdict final inchangé (Toini) : **À privilégier (≥ 70) / À surveiller (40-69) / À éviter (< 40)** — bornes à calibrer.
 
 ### 5.4 Taxonomie des red flags (3 niveaux)
 
-- **Critiques (veto)** : honeypot, contrat non vérifié, mint/blacklist caché, liquidité débloquée, wash trading manifeste
-- **Majeurs (plafond)** : cliff d'unlock massif < 90j, top 10 holders > 40 %, inflation > 20 %/an, équipe anonyme sans track record, revenus 100 % incentivés, retards roadmap répétés, exposition réglementaire aiguë
-- **Mineurs (malus)** : volume/MC faible, engagement social en déclin, GitHub peu actif, dépendance à un seul exchange/market maker
+- **Critiques (forte pénalité de pilier + garde-fou contrat)** : honeypot, contrat non vérifié, mint/blacklist caché, taxe extrême, wash trading manifeste. Les trois signaux « contrat » objectifs (honeypot, non vérifié, taxe extrême) bornent en plus le verdict à « à surveiller ».
+- **Majeurs (pénalité de pilier modérée)** : cliff d'unlock massif < 90j, top 10 holders > 40 %, inflation > 20 %/an, équipe anonyme sans track record, revenus 100 % incentivés, retards roadmap répétés, exposition réglementaire aiguë
+- **Mineurs (faible pénalité)** : engagement social en déclin, GitHub peu actif, prix très loin sous l'ATH, dépendance à un seul exchange/market maker
 
 ### 5.5 Format du livrable (conservé de Toini, enrichi)
 
@@ -282,7 +291,7 @@ Points d'attention : la couche sociale est le maillon le plus cher et le moins c
 ### 7.1 Principes de conception (dérivés directement du §2)
 
 1. **Les chiffres ne passent jamais par le LLM** : toute métrique est récupérée par API et calculée de façon déterministe. Le LLM ne fait que la synthèse qualitative (équipe, narratif, interprétation) et la rédaction — avec citations.
-2. **Méthodologie versionnée** : la grille de scoring (piliers, poids, seuils, vetos) est de la *configuration*, pas du code en dur — auditable, modifiable, historisée. Un rapport référence la version de méthodologie utilisée.
+2. **Méthodologie versionnée** : la grille de scoring (piliers, poids, seuils, pénalités, garde-fous) est de la *configuration*, pas du code en dur — auditable, modifiable, historisée. Un rapport référence la version de méthodologie utilisée.
 3. **Tout est horodaté et sourcé** : un rapport est un snapshot reproductible.
 4. **Dégradation gracieuse** : source indisponible → section marquée "données manquantes" avec impact sur le niveau de confiance, jamais d'invention.
 5. **Adaptation au narratif** : le profil de métriques (DeFi / L1 / meme / DePIN / RWA / IA) est sélectionné en début d'analyse et conditionne les métriques du pilier 3.

@@ -36,8 +36,12 @@ export interface PillarScore {
   id: PillarId;
   label: string;
   weight: number;
-  /** Moyenne pondérée des composants disponibles, null si aucun. */
+  /** Score final du pilier après pénalité de red flags, null si aucun composant. */
   score: number | null;
+  /** Score du pilier avant pénalité de red flags (= moyenne pondérée des composants). */
+  scoreBeforeFlags: number | null;
+  /** Points retirés au pilier par ses red flags (≥ 0). */
+  flagPenalty: number;
   /** Part du poids des composants effectivement scorés (0-1). */
   coverage: number;
   components: ComponentScore[];
@@ -46,11 +50,14 @@ export interface PillarScore {
 export interface ScoringResult {
   methodologyVersion: string;
   pillars: PillarScore[];
-  /** Score global avant vetos. */
+  /** Score global avant pénalités de red flags (moyenne pondérée des piliers bruts). */
   rawScore: number | null;
-  /** Score global après application des plafonds (vetos). */
+  /** Score global après pénalités de red flags par pilier (plus aucun plafond). */
   globalScore: number | null;
-  appliedCaps: { reason: string; cap: number }[];
+  /** Total des points retirés au global par les pénalités de pilier (≥ 0). */
+  redFlagPenalty: number;
+  /** Si un critical « contrat » a plafonné le score sous « privilégier », la valeur du plafond ; sinon null. */
+  contractCriticalCap: number | null;
   verdict: Verdict;
   confidence: Confidence;
   redFlags: RedFlag[];

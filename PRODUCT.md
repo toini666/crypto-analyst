@@ -10,7 +10,7 @@ Antoine, investisseur crypto particulier exigeant. Utilise l'outil seul, le soir
 
 ## Product Purpose
 
-Moteur personnel de due diligence crypto : on donne un nom + ticker, un pipeline déterministe (CoinGecko, DeFiLlama, GoPlus, GitHub, puis Claude Code headless pour le qualitatif) produit un rapport noté sur 6 piliers avec red flags et vetos. Le succès : Antoine fait confiance aux chiffres (toujours sourcés, jamais hallucinés) et lit l'essentiel en moins de 3 minutes. Méthodologie complète dans CADRAGE.md.
+Moteur personnel de due diligence crypto : on donne un nom + ticker, un pipeline déterministe (CoinGecko, DeFiLlama, GoPlus, GitHub, puis Claude Code headless pour le qualitatif) produit un rapport noté sur 6 piliers avec des red flags qui pénalisent leur pilier d'origine (et un garde-fou « contrat »). Le succès : Antoine fait confiance aux chiffres (toujours sourcés, jamais hallucinés) et lit l'essentiel en moins de 3 minutes. Méthodologie complète dans CADRAGE.md.
 
 ## Brand Personality
 
@@ -29,7 +29,7 @@ Rigoureux, calme, tranchant. L'ambiance d'une salle de lecture d'analyste tard l
 2. **Lecture avant décoration** : le rapport est le produit ; la typographie de lecture longue prime sur l'ornement.
 3. **Le verdict en un coup d'œil, la preuve en dessous** : divulgation progressive — score/verdict immédiats, drill-down par pilier ensuite.
 4. **Le mouvement signifie l'état** : la progression du pipeline est la seule chorégraphie riche ; ailleurs, 150-250 ms, états avant tout.
-5. **Sévérité visible** : les red flags et vetos ne sont jamais esthétiquement adoucis ; un veto plafonne le score et ça doit se voir.
+5. **Sévérité visible** : les red flags ne sont jamais esthétiquement adoucis ; leur pénalité sur le score (et le garde-fou « contrat » qui plafonne à 69) doit se voir.
 
 ## Accessibility & Inclusion
 

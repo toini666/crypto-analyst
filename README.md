@@ -1,14 +1,14 @@
 # Crypto Analyst
 
-Moteur personnel de due diligence crypto : on donne le **nom + ticker** d'un projet, un **pipeline déterministe** collecte les données (CoinGecko, DeFiLlama, GoPlus, GitHub), calcule métriques et scores des **6 piliers**, détecte les **red flags** (avec vetos), lance **Claude Code en headless local** pour la partie qualitative sourcée (équipe, unlocks, comparables, audits…), puis assemble un **rapport Markdown complet**.
+Moteur personnel de due diligence crypto : on donne le **nom + ticker** d'un projet, un **pipeline déterministe** collecte les données (CoinGecko, DeFiLlama, GoPlus, GitHub), calcule métriques et scores des **6 piliers**, détecte les **red flags** (qui pénalisent leur pilier d'origine), lance **Claude Code en headless local** pour la partie qualitative sourcée (équipe, unlocks, comparables, audits…), puis assemble un **rapport Markdown complet**.
 
 Méthodologie complète : [CADRAGE.md](CADRAGE.md) · Design : [PRODUCT.md](PRODUCT.md), [DESIGN.md](DESIGN.md)
 
 ## Principes non négociables
 
 - **Aucun chiffre ne passe par le LLM** : les métriques sont récupérées par API et calculées de façon déterministe. Claude ne fait que le qualitatif, avec citations.
-- **Méthodologie versionnée** : poids, seuils et vetos vivent dans `src/engine/methodology.ts` (`METHODOLOGY_VERSION`). Chaque rapport référence sa version.
-- **Veto > moyenne** : un red flag critique plafonne le score à 20, un majeur à 55. Une moyenne pondérée ne masque jamais un défaut fatal.
+- **Méthodologie versionnée** : poids, seuils, pénalités et garde-fous vivent dans `src/engine/methodology.ts` (`METHODOLOGY_VERSION`). Chaque rapport référence sa version.
+- **Red flags > moyenne** : chaque red flag abaisse le score du pilier d'où il vient (critical −40, major −14, minor −3, rendements décroissants), répercuté au global par la pondération — un défaut n'est jamais masqué par la moyenne. Un red flag critique « contrat » objectif (honeypot, code non vérifié, taxe extrême) plafonne en plus le score à 69 (verdict « à surveiller » au minimum, jamais « à privilégier »).
 - **Données manquantes = signalées**, jamais inventées (couverture par pilier + niveau de confiance global).
 
 ## Prérequis
@@ -31,7 +31,14 @@ Ouvrir <http://localhost:3000>, saisir un nom + ticker, lancer. Comptez 5 à 15 
 Une analyse peut aussi se lancer à la main :
 
 ```bash
-pnpm analyze <analysisId>   # relance le pipeline d'une ligne existante
+pnpm analyze <analysisId>       # relance le pipeline d'une ligne existante
+```
+
+Et après un changement de méthodologie, on peut **re-scorer toutes les analyses existantes** sans re-fetch ni re-run Claude (recalcul depuis les données brutes déjà stockées) :
+
+```bash
+tsx scripts/rescore.ts          # dry-run : affiche l'avant/après, n'écrit rien
+tsx scripts/rescore.ts --apply  # applique en base (idempotent)
 ```
 
 ## Configuration (`.env.local`)
@@ -62,24 +69,25 @@ Toutes les variables sont **optionnelles** (le backend SQLite ne demande aucune 
 ```
 src/
 ├── app/                      # Next.js (dashboard, page d'analyse, API routes)
-├── components/               # ScoreDial, PillarBars, PipelineStepper, ReportView…
+├── components/               # ScoreDial, ScoreBar, PipelineStepper, ReportView…
 ├── engine/                   # le moteur d'analyse
-│   ├── methodology.ts        # ⚖️  config versionnée : piliers, poids, seuils, vetos
-│   ├── pipeline.ts           # orchestrateur des 10 étapes (progression → Supabase)
+│   ├── methodology.ts        # ⚖️  config versionnée : piliers, poids, seuils, pénalités, garde-fous
+│   ├── pipeline.ts           # orchestrateur des 10 étapes (progression → SQLite)
 │   ├── fetchers/             # coingecko, defillama, goplus, github
 │   ├── metrics.ts            # calcul déterministe des ratios
 │   ├── redflags.ts           # détection quantitative (3 sévérités)
-│   ├── scoring.ts            # scores par pilier + vetos + verdict + confiance
+│   ├── scoring.ts            # scores par pilier + pénalités red flags + garde-fou contrat + verdict
 │   ├── qualitative.ts        # claude -p headless (JSON strict validé par zod)
 │   └── report.ts             # assemblage du rapport Markdown
 └── lib/                      # types partagés, accès SQLite (lib/db), formats
 scripts/run-analysis.ts       # runner détaché (spawné par l'API route)
+scripts/rescore.ts            # re-scoring des analyses existantes (dry-run / --apply)
 data/app.db                   # base SQLite locale (gitignorée, créée au 1er lancement)
 ```
 
 Schéma : tables `analyses` et `analysis_events`, créées au démarrage par `src/lib/db/`. Le frontend lit via les routes API (`GET /api/analyses`, `GET /api/analyses/[id]`) et **rafraîchit par polling** pendant qu'une analyse tourne ; les écritures passent par le runner détaché et les routes API.
 
-## Scoring (méthodologie v1.0.0)
+## Scoring (méthodologie v2.0.0)
 
 | Pilier | Poids |
 |---|---|
@@ -90,6 +98,6 @@ Schéma : tables `analyses` et `analysis_events`, créées au démarrage par `sr
 | Social & mindshare | 10 % |
 | Sécurité & risques | 10 % |
 
-Verdicts : **≥ 70 à privilégier · 40-69 à surveiller · < 40 à éviter** — après application des vetos.
+Verdicts : **≥ 70 à privilégier · 40-69 à surveiller · < 40 à éviter** — après pénalités de red flags par pilier (et garde-fou « critical contrat » à 69).
 
 > Les rapports sont de la recherche personnelle, pas du conseil en investissement.

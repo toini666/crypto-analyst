@@ -5,7 +5,7 @@
 ## Reprendre ici (état au 18 juin 2026)
 
 - **Fait (session 2, 18/06)** : (1) **Restyle « terminal »** sur toute l'app (repris de Claude Design) — palette ambre `#D9A13B` + IBM Plex Sans/Mono, tokens dans `globals.css`, `DESIGN.md` mis à jour. (2) **Landing** (`/`, hero « produit ») + **navigation** (`SiteHeader` : landing / Analyses / Portefeuille) ; dashboard déplacé sur `/analyses`. (3) **Analyse de portefeuille** (`/portfolio`) : diagnostic déterministe **Tier A** du briefing (`src/engine/portfolio.ts`, `PORTFOLIO_METHODOLOGY_VERSION = 0.1.0`), saisie persistée en SQLite (`portfolios` + `portfolio_holdings`), liaison aux analyses de projet existantes (qualité pondérée + risque, dégrade en n/d). Entrée = poche crypto uniquement (tranché avec Antoine, briefing §0.1).
-- **Fait** : MVP complet et fonctionnel — pipeline 10 étapes, 6 piliers, red flags/vetos, dashboard temps réel, vue rapport. 3 analyses d'Aave validées end-to-end (verdict 55/100, plafonné par veto gouvernance). Méthodologie v1.1.0.
+- **Fait** : MVP complet et fonctionnel — pipeline 10 étapes, 6 piliers, red flags, dashboard temps réel, vue rapport. Panel de 10 tokens analysés. Méthodologie **v2.0.0** (30/06) : red flags en pénalités par pilier (fin des plafonds durs) ; re-scoring de masse via `scripts/rescore.ts`.
 - **Lancement** : `./start.sh` (`pnpm dev` + ouvre le navigateur). Backend = **SQLite local** (`./data/app.db`, `better-sqlite3`, WAL ; progression par polling) — bascule depuis Supabase le 18/06/2026 (plan gratuit plafonné à 2 projets, déjà pris). Aucun Docker, aucune clé.
 - **Prochaine étape** : calibrer le scoring portefeuille (`0.1.0` provisoire) sur des portefeuilles réels ; **Tier B** (métriques de risque sur historique de prix) et **Tier C** (recommandations live + prix d'entrée) restent à faire. Côté projet : Phase 0 (hygiène) puis Phase 1 (CoinGecko).
 
@@ -13,7 +13,7 @@
 
 ## Phase 0 — Hygiène du repo (à faire en début de prochaine session)
 
-- [ ] Commiter le travail en cours : le repo n'a que 2 commits, tout le récent est non commité (méthodologie v1.1.0, ConfirmDialog, icônes Lucide, fixes DeFiLlama/GitHub).
+- [x] Commiter le travail en cours (fait au fil des sessions) — dernier lot : méthodologie v2.0.0 (pénalités par pilier) + refonte de la vue rapport + nouveaux composants + doc resynchronisée.
 - [ ] Ajouter `reports/` au `.gitignore` (exports générés ; `logs/` y est déjà).
 - [ ] Créer `.env.example` documentant toutes les variables (les 4 actuelles + `COINGECKO_API_KEY`, `GITHUB_TOKEN`, `CLAUDE_QUAL_MODEL`).
 - [ ] Renseigner dans `.env.local` : `COINGECKO_API_KEY` (clé Demo gratuite, déjà supportée par `src/engine/fetchers/coingecko.ts`) et `GITHUB_TOKEN` (déjà supporté, 60 req/h sans token sinon).
@@ -50,9 +50,9 @@ Contrainte structurante : le qualitatif passe par Claude Code headless **local**
 Le cœur de la valeur du produit. Un seul projet analysé (Aave) ne calibre rien.
 
 - [ ] **Panel de calibration** : lancer le pipeline sur ~8-10 tokens contrastés — blue chip DeFi (Aave ✓), mid-cap DeFi (Curve, GMX), L1 (Solana, Avalanche), meme (DOGE, PEPE), small cap récente, projet notoirement risqué. Vérifier que le classement relatif des verdicts est défendable.
-- [ ] **Règle des vetos** : point sensible identifié — un seul red flag « majeur » plafonne à 55. Évaluer sur le panel : plafond par cumul ? sévérité pondérée par pilier ? Toute modif → `METHODOLOGY_VERSION` incrémentée dans `src/engine/methodology.ts`.
+- [x] **Règle des vetos → pénalités par pilier (v2.0.0, 30/06)** : plus de plafonds durs. Un red flag pénalise le pilier d'origine (critical 40 / major 14 / minor 3, en √n), sans plancher. Volume entièrement retiré du scoring (red flag + composant) ; `HIDDEN_MINT` resserré (faux positif NTT/Centrifuge) ; bug d'unité concentration corrigé ; garde-fou « critical contrat » (honeypot / non vérifié / taxe extrême → verdict ≤ surveiller). **Reste ouvert** : calibrer les 3 constantes de pénalité sur un plus grand panel.
 - [ ] **Stabilité du qualitatif** : la partie Claude varie d'un run à l'autre (recherche web). Contraindre davantage le prompt de `src/engine/qualitative.ts` (sources exigées, format de citation) et mesurer la variance sur 3 runs d'un même token.
-- [ ] **Re-scoring sans re-fetch** : avec le cache Phase 1, pouvoir rejouer le scoring d'analyses existantes après un changement de méthodologie (comparaison avant/après sur tout le panel).
+- [x] **Re-scoring sans re-fetch** : `scripts/rescore.ts` rejoue le scoring de toutes les analyses depuis `raw_data` (pas de re-fetch ni de re-run Claude), dry-run par défaut, `--apply` pour écrire, idempotent. Utilisé pour migrer les 10 analyses en v2.0.0.
 
 ## Phase 5 — UX/UI niveau V1
 
@@ -60,6 +60,7 @@ Retour utilisateur du 11/06 : rendu jugé « simpliste », attente d'un niveau p
 
 - [ ] **Critique structurée** : passe `/impeccable critique` complète des deux écrans (dashboard, rapport) → backlog de polish priorisé.
 - [ ] **Appliquer le backlog** (`/impeccable polish`), avec les skills `gsap-*` pour le motion.
+  - ✅ *Landing (`/`)* : passe « vivant » — chorégraphie d'entrée GSAP, carte démo *live* (score qui se compte, barres qui se remplissent), aura ambrée + grille animées (CSS), parallaxe pointeur sur la carte, révélations au scroll (`ScrollTrigger.batch`) + compteurs des stats. Mouvement seul (palette/typo inchangées), tout gaté `prefers-reduced-motion`. Reste : dashboard `/analyses`, vue rapport, portefeuille.
 - [ ] **Actions manquantes sur le rapport** : supprimer et relancer l'analyse depuis la vue rapport (aujourd'hui uniquement depuis la vue échec / le dashboard).
 - [ ] **Comparaison** (PRODUCT.md : « il revient comparer des analyses passées ») : même token dans le temps (évolution du score entre versions de méthodologie) et tokens entre eux. À cadrer avant de coder.
 

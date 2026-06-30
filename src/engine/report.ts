@@ -70,20 +70,25 @@ export function buildReport(
     L.push("");
   }
   L.push(`### Verdict : ${VERDICT_LABEL[scoring.verdict]} — Score global : **${score(scoring.globalScore)}**`);
-  if (scoring.appliedCaps.length > 0) {
+  if (scoring.redFlagPenalty > 0) {
     L.push("");
-    for (const cap of scoring.appliedCaps) {
-      L.push(
-        `> ⚠️ **Veto appliqué** : ${cap.reason} → score plafonné à ${cap.cap} (score avant veto : ${score(scoring.rawScore)}).`
-      );
-    }
+    L.push(
+      `> ⚠️ **Red flags** : −${scoring.redFlagPenalty} pts imputés aux piliers concernés (score avant red flags : ${score(scoring.rawScore)}).`
+    );
+  }
+  if (scoring.contractCriticalCap != null) {
+    L.push("");
+    L.push(
+      `> 🟥 **Red flag critique « contrat »** détecté → verdict limité à « À surveiller » : score plafonné à ${scoring.contractCriticalCap}/100 (ne peut pas être « À privilégier »).`
+    );
   }
   L.push("");
-  L.push("| Pilier | Poids | Score | Couverture données |");
-  L.push("|---|---|---|---|");
+  L.push("| Pilier | Poids | Score | Red flags | Couverture données |");
+  L.push("|---|---|---|---|---|");
   for (const p of scoring.pillars) {
+    const pen = p.flagPenalty > 0 ? `−${p.flagPenalty} pts` : "—";
     L.push(
-      `| **${p.label}** | ${(p.weight * 100).toFixed(0)} % | ${score(p.score)} | ${(p.coverage * 100).toFixed(0)} % |`
+      `| **${p.label}** | ${(p.weight * 100).toFixed(0)} % | ${score(p.score)} | ${pen} | ${(p.coverage * 100).toFixed(0)} % |`
     );
   }
   L.push("");
@@ -122,7 +127,9 @@ export function buildReport(
   L.push("## Analyse détaillée par pilier");
   L.push("");
   for (const p of scoring.pillars) {
-    L.push(`### ${p.label} — ${score(p.score)} *(poids ${(p.weight * 100).toFixed(0)} %)*`);
+    const penNote =
+      p.flagPenalty > 0 ? ` · red flags −${p.flagPenalty} pts (base ${score(p.scoreBeforeFlags)})` : "";
+    L.push(`### ${p.label} — ${score(p.score)} *(poids ${(p.weight * 100).toFixed(0)} %${penNote})*`);
     L.push("");
     for (const c of p.components) {
       L.push(`#### ${c.label} — ${score(c.score)}`);

@@ -2,11 +2,18 @@
 // Toute modification des poids, seuils ou vetos doit incrémenter METHODOLOGY_VERSION :
 // un rapport référence la version utilisée pour rester comparable dans le temps.
 
-import type { PillarId } from "@/lib/types";
+import type { PillarId, RedFlagSeverity } from "@/lib/types";
 
+// 2.0.0 — refonte du traitement des red flags (décision Antoine 30/06/2026) :
+//   • Les plafonds durs (« chutes d'office » à 20/55) sont supprimés. Un red flag
+//     pénalise désormais le SCORE DU PILIER d'où il vient (par sévérité), qui se
+//     répercute sur le global via la moyenne pondérée. Plus aucun plancher.
+//   • Le volume (court terme, bruité) n'est plus un red flag (DEAD/LOW_VOLUME retirés).
+//   • HIDDEN_MINT ne se déclenche plus sur les tokens mintables légitimes
+//     (bridge/NTT, gouvernance) : un signal de danger corroborant est exigé.
 // 1.1.0 — les red flags qualitatifs portent leur propre sévérité (classifiée par
 //          Claude avec critères explicites) au lieu d'être tous traités en "major".
-export const METHODOLOGY_VERSION = "1.1.0";
+export const METHODOLOGY_VERSION = "2.0.0";
 
 export interface ComponentDef {
   id: string;
@@ -60,10 +67,12 @@ export const PILLARS: PillarDef[] = [
     id: "marche",
     label: "Marché & valorisation",
     weight: 0.15,
+    // Le volume/liquidité (court terme, bruité d'un jour à l'autre) n'est plus un
+    // composant de score (v2.0.0, décision Antoine 30/06/2026) : il reste affiché
+    // dans l'annexe données du rapport, mais ne pèse pas sur la note.
     components: [
-      { id: "liquidite", label: "Liquidité (Volume/MC)", weight: 0.35, origin: "quant" },
-      { id: "valo_revenus", label: "Valorisation vs revenus (P/S)", weight: 0.2, origin: "quant" },
-      { id: "comparables", label: "Valorisation vs comparables", weight: 0.45, origin: "qual", qualSection: "comparables" },
+      { id: "valo_revenus", label: "Valorisation vs revenus (P/S)", weight: 0.3, origin: "quant" },
+      { id: "comparables", label: "Valorisation vs comparables", weight: 0.7, origin: "qual", qualSection: "comparables" },
     ],
   },
   {
@@ -90,10 +99,39 @@ export const PILLARS: PillarDef[] = [
 /** Bornes de verdict (CADRAGE §5.3) — à calibrer par itérations. */
 export const VERDICT_BOUNDS = { privilegier: 70, surveiller: 40 };
 
-/** Plafonds appliqués après la moyenne pondérée. */
-export const SEVERITY_CAPS: Record<"critical" | "major", number> = {
-  critical: 20,
-  major: 55,
+/**
+ * Red flags critiques « contrat » objectifs (peu sujets aux faux positifs) :
+ * leur présence interdit le verdict « privilégier » — le score est ramené juste
+ * sous le seuil pour garantir au minimum « à surveiller » (décision Antoine 30/06).
+ * NB : HIDDEN_MINT en est exclu (faux positif fréquent sur tokens bridgés/NTT).
+ */
+export const CONTRACT_CRITICAL_CODES = ["HONEYPOT", "NOT_OPEN_SOURCE", "EXTREME_TAX"];
+
+/**
+ * Pénalité (en points) retirée au SCORE DU PILIER d'origine pour chaque red flag,
+ * selon sa sévérité (v2.0.0). Plus de plafond global : la pénalité abaisse le pilier
+ * concerné, qui se répercute sur le global au prorata de son poids. Plusieurs flags
+ * d'une même sévérité dans un même pilier suivent des rendements décroissants (√n)
+ * pour ne pas écraser un pilier sur une accumulation de signaux mineurs.
+ * Le pilier ne descend jamais sous 0 (aucun palier artificiel).
+ */
+export const PILLAR_FLAG_PENALTIES: Record<RedFlagSeverity, number> = {
+  critical: 40,
+  major: 14,
+  minor: 3,
+};
+
+/** Pilier d'origine de chaque red flag quantitatif (pour la pénalité par pilier). */
+export const QUANT_RED_FLAG_PILLAR: Record<string, PillarId> = {
+  HONEYPOT: "securite",
+  NOT_OPEN_SOURCE: "securite",
+  HIDDEN_MINT: "securite",
+  EXTREME_TAX: "securite",
+  OWNER_PRIVILEGES: "securite",
+  HIGH_CONCENTRATION: "securite",
+  HEAVY_DILUTION: "tokenomics",
+  STALE_GITHUB: "social",
+  DEEP_DRAWDOWN: "marche",
 };
 
 /**
@@ -172,13 +210,13 @@ export const RED_FLAG_DEFS = {
   NOT_OPEN_SOURCE: { severity: "critical", label: "Contrat non vérifié / code source fermé" },
   HIDDEN_MINT: { severity: "critical", label: "Fonction de mint active aux mains du déployeur" },
   EXTREME_TAX: { severity: "critical", label: "Taxe d'achat/vente > 10 %" },
-  // Majeurs (plafond 55)
+  // Majeurs — pénalisent leur pilier d'origine (sécurité / tokenomics).
   HIGH_CONCENTRATION: { severity: "major", label: "Top 10 holders > 40 % de l'offre" },
   HEAVY_DILUTION: { severity: "major", label: "MC/FDV < 0,25 : forte dilution à venir" },
-  DEAD_VOLUME: { severity: "major", label: "Volume/MC < 5 % : liquidité insuffisante (token « mort »)" },
   OWNER_PRIVILEGES: { severity: "major", label: "Privilèges propriétaire dangereux (blacklist, pause, modification de taxe)" },
-  // Mineurs (signal, pas de plafond)
-  LOW_VOLUME: { severity: "minor", label: "Volume/MC < 10 % : sous le seuil méthodologique" },
+  // Mineurs — signal de vigilance, faible pénalité de pilier.
+  // NB : le volume (court terme, bruité) n'est plus ni red flag ni composant de
+  //      score (v2.0.0) ; il reste seulement affiché (KeyMetrics + annexe rapport).
   STALE_GITHUB: { severity: "minor", label: "Aucun commit GitHub depuis plus de 90 jours" },
   DEEP_DRAWDOWN: { severity: "minor", label: "Prix > 90 % sous l'ATH" },
 } as const;
@@ -190,6 +228,25 @@ export function getPillar(id: PillarId): PillarDef {
   const p = PILLARS.find((x) => x.id === id);
   if (!p) throw new Error(`Pilier inconnu : ${id}`);
   return p;
+}
+
+/** Section qualitative → pilier (dérivé des composants `qualSection` de PILLARS). */
+export const SECTION_PILLAR: Record<string, PillarId> = Object.fromEntries(
+  PILLARS.flatMap((p) =>
+    p.components.filter((c) => c.qualSection).map((c) => [c.qualSection!, p.id])
+  )
+) as Record<string, PillarId>;
+
+/**
+ * Pilier d'origine d'un red flag, pour lui imputer sa pénalité.
+ * Les red flags qualitatifs portent le code `QUAL_<SECTION>` ; les quantitatifs
+ * sont mappés explicitement. null = pilier indéterminé (pénalité non imputée).
+ */
+export function pillarForRedFlag(code: string): PillarId | null {
+  if (code.startsWith("QUAL_")) {
+    return SECTION_PILLAR[code.slice(5).toLowerCase()] ?? null;
+  }
+  return QUANT_RED_FLAG_PILLAR[code] ?? null;
 }
 
 /* ─────────────────────── Méthodologie portefeuille ───────────────────────

@@ -36,6 +36,53 @@ export function scoreColor(score: number | null): string {
   return "var(--color-danger)";
 }
 
+/* ── Formatteurs numériques (locale fr-FR, virgule décimale) ──
+   Données déjà calculées par le moteur ; ici on ne fait que présenter. */
+
+const FR = "fr-FR";
+
+function frNum(v: number, min = 0, max = 2): string {
+  return v.toLocaleString(FR, { minimumFractionDigits: min, maximumFractionDigits: max });
+}
+
+/** 3 chiffres significatifs, sans zéros parasites (ex. 2,74 / 24,6 / 182). */
+function sig3(v: number): string {
+  return Number(v.toPrecision(3)).toLocaleString(FR, { maximumFractionDigits: 4 });
+}
+
+/** Montant en dollars, abrégé Md / M / k au-delà du millier. null → « n/d ». */
+export function formatMoney(v: number | null | undefined): string {
+  if (v == null) return "n/d";
+  const a = Math.abs(v);
+  if (a >= 1e9) return `$${sig3(v / 1e9)} Md`;
+  if (a >= 1e6) return `$${sig3(v / 1e6)} M`;
+  if (a >= 1e3) return `$${sig3(v / 1e3)} k`;
+  if (a > 0 && a < 1) return `$${frNum(v, 0, 4)}`;
+  return `$${frNum(v, 2, 2)}`;
+}
+
+export function formatPct(v: number | null | undefined, digits = 1): string {
+  if (v == null) return "n/d";
+  return `${frNum(v, 0, digits)} %`;
+}
+
+/** Pourcentage signé pour les variations (+8,2 % / −33,3 %). */
+export function formatPctSigned(v: number | null | undefined, digits = 1): string {
+  if (v == null) return "n/d";
+  const sign = v > 0 ? "+" : v < 0 ? "−" : "";
+  return `${sign}${frNum(Math.abs(v), 0, digits)} %`;
+}
+
+export function formatNum(v: number | null | undefined): string {
+  if (v == null) return "n/d";
+  return v.toLocaleString(FR, { maximumFractionDigits: 0 });
+}
+
+export function formatRatio(v: number | null | undefined, digits = 2): string {
+  if (v == null) return "n/d";
+  return frNum(v, 0, digits);
+}
+
 export function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("fr-FR");
 }

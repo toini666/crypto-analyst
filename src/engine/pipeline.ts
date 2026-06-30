@@ -162,7 +162,7 @@ export async function runPipeline(analysisId: string): Promise<void> {
     const scoring = computeScoring(metrics, quantRedFlags, qual);
     await r.event(
       "final",
-      `Score global : ${scoring.globalScore ?? "n/d"}/100${scoring.appliedCaps.length > 0 ? ` (veto : plafonné depuis ${scoring.rawScore})` : ""} → ${scoring.verdict}`,
+      `Score global : ${scoring.globalScore ?? "n/d"}/100${scoring.redFlagPenalty > 0 ? ` (red flags : −${scoring.redFlagPenalty} depuis ${scoring.rawScore})` : ""} → ${scoring.verdict}`,
       "success"
     );
 
@@ -179,7 +179,11 @@ export async function runPipeline(analysisId: string): Promise<void> {
         security,
         dev,
         qualitative: qual,
-        scoring: { rawScore: scoring.rawScore, appliedCaps: scoring.appliedCaps },
+        scoring: {
+          rawScore: scoring.rawScore,
+          redFlagPenalty: scoring.redFlagPenalty,
+          contractCriticalCap: scoring.contractCriticalCap,
+        },
       },
       methodology_version: METHODOLOGY_VERSION,
       global_score: scoring.globalScore,

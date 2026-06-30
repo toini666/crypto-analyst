@@ -109,8 +109,12 @@ export default function AnalysisPage({ params }: { params: Promise<{ id: string 
     );
   }
 
+  // Le rapport complété respire en pleine largeur (grilles scannables) ;
+  // les vues progression/échec restent en colonne étroite (lecture/log).
+  const wide = row.status === "completed";
+
   return (
-    <main className="mx-auto max-w-5xl px-6 pb-28 pt-8">
+    <main className={`mx-auto px-6 pb-28 pt-8 ${wide ? "max-w-[1240px]" : "max-w-5xl"}`}>
       <nav className="mb-6">
         <Link
           href="/analyses"
