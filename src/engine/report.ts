@@ -3,6 +3,7 @@
 // thèse falsifiable → annexe données sourcées → disclaimer.
 
 import type { Metrics, QualitativeResult, ScoringResult } from "@/lib/types";
+import { GLOSSARY, type GlossaryKey } from "@/lib/glossary";
 
 const VERDICT_LABEL: Record<string, string> = {
   privilegier: "✅ À privilégier",
@@ -42,15 +43,23 @@ function score(v: number | null): string {
   return v == null ? "n/d" : `${v}/100`;
 }
 
+/** Termes du lexique inclus en fin de rapport (ordre de lecture). */
+const LEXIQUE_KEYS: GlossaryKey[] = [
+  "marketCap", "fdv", "mcFdv", "volumeMc", "tvl", "tvlMc",
+  "revenue", "psRatio", "ath", "drawdown", "circulatingPct", "top10", "tax",
+];
+
 export function buildReport(
   tokenName: string,
   ticker: string,
   coingeckoId: string,
   metrics: Metrics,
   scoring: ScoringResult,
-  qual: QualitativeResult | null
+  qual: QualitativeResult | null,
+  opts?: { createdAt?: string }
 ): string {
-  const date = new Date().toISOString().slice(0, 10);
+  // Date du rapport = date de l'analyse (fidèle au snapshot), à défaut aujourd'hui.
+  const date = (opts?.createdAt ?? new Date().toISOString()).slice(0, 10);
   const L: string[] = [];
 
   L.push(`# ${tokenName} (${ticker.toUpperCase()}) — Analyse de due diligence`);
@@ -216,6 +225,17 @@ export function buildReport(
   L.push(
     `*Données récupérées le ${fetchedAt ? new Date(fetchedAt).toLocaleString("fr-FR") : date} via ${Object.values(metrics.sources).map((s) => s.name).join(", ")}.*`
   );
+  L.push("");
+
+  // ── Lexique — pour rendre les indicateurs lisibles par tout lecteur ──
+  L.push("## Lexique des indicateurs");
+  L.push("");
+  L.push("*Repères pour lire les chiffres ci-dessus sans connaissance technique préalable.*");
+  L.push("");
+  for (const k of LEXIQUE_KEYS) {
+    const e = GLOSSARY[k];
+    L.push(`- **${e.term}** — ${e.def}`);
+  }
   L.push("");
   L.push("---");
   L.push("");

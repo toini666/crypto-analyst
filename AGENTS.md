@@ -23,3 +23,5 @@ Moteur personnel de due diligence crypto. Lire `CADRAGE.md` (méthodologie), `PR
 - `pnpm typecheck && pnpm lint && pnpm build` avant de considérer un changement terminé
 - `pnpm analyze <analysisId>` : relance le pipeline d'une ligne existante (logs : `logs/<id>.log`)
 - `tsx scripts/rescore.ts [--apply]` : re-score toutes les analyses existantes après un changement de méthodologie — recalcul depuis `raw_data` (pas de re-fetch ni de re-run Claude), dry-run sans `--apply`, idempotent
+- `pnpm vulgarize [<id>] [--apply]` : repasse de vulgarisation de la prose qualitative (réécriture accessible via `claude -p`, sans re-fetch), depuis `raw_data.qualitative_original` (idempotent) ; scores/sources/sévérités/chiffres préservés par fusion en code. Dry-run sans `--apply`. Style partagé : `VULGARIZATION_GUIDE` dans `src/engine/vulgarization.ts`.
+- `pnpm export-reports` : (ré)écrit les rapports `.md` versionnés dans `reports/` depuis la base. Les rapports sont aussi écrits automatiquement par le pipeline à chaque analyse terminée.

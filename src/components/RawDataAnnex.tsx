@@ -8,12 +8,15 @@ import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import type { Metrics } from "@/lib/types";
 import { formatMoney, formatNum, formatPct, formatPctSigned, formatRatio } from "@/lib/format";
+import { GLOSSARY, type GlossaryKey } from "@/lib/glossary";
 import { Disclosure } from "./Disclosure";
+import { Hint } from "./Hint";
 
 interface Cell {
   label: string;
   value: string;
   missing: boolean;
+  hint?: GlossaryKey;
 }
 
 interface Group {
@@ -21,8 +24,8 @@ interface Group {
   cells: Cell[];
 }
 
-function cell(label: string, raw: number | null, value: string): Cell {
-  return { label, value, missing: raw == null };
+function cell(label: string, raw: number | null, value: string, hint?: GlossaryKey): Cell {
+  return { label, value, missing: raw == null, hint };
 }
 
 function athLabel(m: Metrics): string {
@@ -43,58 +46,60 @@ function buildGroups(m: Metrics, ticker: string): Group[] {
       title: "Marché — CoinGecko",
       cells: [
         cell("Prix", m.priceUsd, formatMoney(m.priceUsd)),
-        cell("Market Cap", m.marketCapUsd, formatMoney(m.marketCapUsd)),
-        cell("FDV", m.fdvUsd, formatMoney(m.fdvUsd)),
-        cell("Ratio MC/FDV", m.mcFdvRatio, formatRatio(m.mcFdvRatio)),
+        cell("Market Cap", m.marketCapUsd, formatMoney(m.marketCapUsd), "marketCap"),
+        cell("FDV", m.fdvUsd, formatMoney(m.fdvUsd), "fdv"),
+        cell("Ratio MC/FDV", m.mcFdvRatio, formatRatio(m.mcFdvRatio), "mcFdv"),
         cell("Rang market cap", m.marketCapRank, m.marketCapRank == null ? "n/d" : `#${m.marketCapRank}`),
-        cell("Volume 24 h", m.volume24hUsd, formatMoney(m.volume24hUsd)),
+        cell("Volume 24 h", m.volume24hUsd, formatMoney(m.volume24hUsd), "volume24h"),
         cell(
           "Ratio Volume/MC",
           m.volumeMcRatio,
-          formatPct(m.volumeMcRatio == null ? null : m.volumeMcRatio * 100)
+          formatPct(m.volumeMcRatio == null ? null : m.volumeMcRatio * 100),
+          "volumeMc"
         ),
-        cell("ATH", m.athUsd, athLabel(m)),
-        cell("Drawdown vs ATH", m.drawdownFromAthPct, formatPctSigned(m.drawdownFromAthPct)),
+        cell("ATH", m.athUsd, athLabel(m), "ath"),
+        cell("Drawdown vs ATH", m.drawdownFromAthPct, formatPctSigned(m.drawdownFromAthPct), "drawdown"),
         cell(
           "Offre circulante",
           m.circulatingSupply,
-          m.circulatingSupply == null ? "n/d" : `${formatNum(m.circulatingSupply)} ${tk}`
+          m.circulatingSupply == null ? "n/d" : `${formatNum(m.circulatingSupply)} ${tk}`,
+          "circulating"
         ),
         cell(
           "Offre totale / max",
           m.totalSupply ?? m.maxSupply,
           `${formatNum(m.totalSupply)} / ${formatNum(m.maxSupply)}`
         ),
-        cell("% circulant", m.circulatingPct, formatPct(m.circulatingPct, 0)),
+        cell("% circulant", m.circulatingPct, formatPct(m.circulatingPct, 0), "circulatingPct"),
         cell("Variation prix 30 j", m.priceChange30dPct, formatPctSigned(m.priceChange30dPct)),
       ],
     },
     {
       title: "DeFi — DeFiLlama",
       cells: [
-        cell("TVL", m.tvlUsd, formatMoney(m.tvlUsd)),
-        cell("Ratio TVL/MC", m.tvlMcRatio, formatRatio(m.tvlMcRatio, 1)),
+        cell("TVL", m.tvlUsd, formatMoney(m.tvlUsd), "tvl"),
+        cell("Ratio TVL/MC", m.tvlMcRatio, formatRatio(m.tvlMcRatio, 1), "tvlMc"),
         cell("Tendance TVL 30 j", m.tvlChange30dPct, formatPctSigned(m.tvlChange30dPct)),
         cell("Frais 30 j", m.fees30dUsd, formatMoney(m.fees30dUsd)),
         cell("Revenus 30 j", m.revenue30dUsd, formatMoney(m.revenue30dUsd)),
-        cell("Revenus annualisés", m.annualizedRevenueUsd, formatMoney(m.annualizedRevenueUsd)),
-        cell("Ratio P/S", m.psRatio, formatRatio(m.psRatio, 1)),
+        cell("Revenus annualisés", m.annualizedRevenueUsd, formatMoney(m.annualizedRevenueUsd), "revenue"),
+        cell("Ratio P/S", m.psRatio, formatRatio(m.psRatio, 1), "psRatio"),
       ],
     },
     {
       title: "Sécurité — GoPlus",
       cells: [
         cell("Holders", m.holderCount, formatNum(m.holderCount)),
-        cell("Top 10 holders", m.top10HoldersPct, formatPct(m.top10HoldersPct)),
-        cell("Taxe achat", m.buyTaxPct, formatPct(m.buyTaxPct)),
-        cell("Taxe vente", m.sellTaxPct, formatPct(m.sellTaxPct)),
+        cell("Top 10 holders", m.top10HoldersPct, formatPct(m.top10HoldersPct), "top10"),
+        cell("Taxe achat", m.buyTaxPct, formatPct(m.buyTaxPct), "tax"),
+        cell("Taxe vente", m.sellTaxPct, formatPct(m.sellTaxPct), "tax"),
       ],
     },
     {
       title: "Développement — GitHub",
       cells: [
-        cell("Commits 90 j", m.githubCommits90d, formatNum(m.githubCommits90d)),
-        cell("Contributeurs", m.githubContributors, formatNum(m.githubContributors)),
+        cell("Commits 90 j", m.githubCommits90d, formatNum(m.githubCommits90d), "commits"),
+        cell("Contributeurs", m.githubContributors, formatNum(m.githubContributors), "contributors"),
         cell("Stars", m.githubStars, formatNum(m.githubStars)),
         cell(
           "Dernier commit",
@@ -151,7 +156,10 @@ export function RawDataAnnex({ metrics, ticker }: { metrics: Metrics; ticker: st
               <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3 lg:grid-cols-4">
                 {g.cells.map((c) => (
                   <div key={c.label} className="bg-surface/60 px-3.5 py-2.5">
-                    <div className="text-xs text-faint">{c.label}</div>
+                    <div className="flex items-center gap-1 text-xs text-faint">
+                      <span>{c.label}</span>
+                      {c.hint && <Hint label={GLOSSARY[c.hint].term} text={GLOSSARY[c.hint].def} />}
+                    </div>
                     <div
                       className={`mt-0.5 font-mono text-sm tabular-nums ${
                         c.missing ? "text-faint/70" : "text-ink"

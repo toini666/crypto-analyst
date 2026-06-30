@@ -31,6 +31,7 @@ interface RawData {
 
 interface DbRow {
   id: string;
+  created_at: string;
   token_name: string;
   ticker: string;
   coingecko_id: string | null;
@@ -53,7 +54,7 @@ async function main() {
   const db = getDb();
   const rows = db
     .prepare(
-      `select id, token_name, ticker, coingecko_id, global_score, verdict, methodology_version, raw_data
+      `select id, created_at, token_name, ticker, coingecko_id, global_score, verdict, methodology_version, raw_data
        from analyses where status = 'completed' order by created_at desc`
     )
     .all() as DbRow[];
@@ -96,7 +97,8 @@ async function main() {
       row.coingecko_id ?? coin.id,
       metrics,
       scoring,
-      qualitative ?? null
+      qualitative ?? null,
+      { createdAt: row.created_at }
     );
 
     const before = row.global_score == null ? "n/d" : String(Math.round(row.global_score));

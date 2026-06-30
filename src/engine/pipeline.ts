@@ -18,6 +18,7 @@ import { computeScoring } from "./scoring";
 import { runQualitativeAnalysis } from "./qualitative";
 import { buildReport } from "./report";
 import { METHODOLOGY_VERSION } from "./methodology";
+import { writeReportFile } from "@/lib/reportFile";
 
 type EventLevel = "info" | "warn" | "error" | "success";
 
@@ -168,7 +169,9 @@ export async function runPipeline(analysisId: string): Promise<void> {
 
     // 10 — Rapport
     await r.step("report");
-    const report = buildReport(coin.name, coin.symbol, match.id, metrics, scoring, qual);
+    const report = buildReport(coin.name, coin.symbol, match.id, metrics, scoring, qual, {
+      createdAt: analysis.created_at,
+    });
     await r.patch({
       status: "completed",
       current_step: "report",
@@ -193,7 +196,14 @@ export async function runPipeline(analysisId: string): Promise<void> {
       red_flags: scoring.redFlags,
       report_md: report,
     });
-    await r.event("report", "Rapport généré et sauvegardé", "success");
+    // Copie versionnée du rapport dans `reports/` (best-effort : une erreur
+    // d'écriture disque ne doit pas faire échouer l'analyse déjà complétée).
+    try {
+      const file = writeReportFile(coin.symbol, analysis.created_at, report);
+      await r.event("report", `Rapport généré et sauvegardé (${file})`, "success");
+    } catch (e) {
+      await r.event("report", `Rapport généré ; copie disque échouée : ${msg(e)}`, "warn");
+    }
   } catch (e) {
     await r.patch({ status: "failed", error: msg(e) });
     await r.event("pipeline", `Échec : ${msg(e)}`, "error");

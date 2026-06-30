@@ -14,7 +14,7 @@
 ## Phase 0 — Hygiène du repo (à faire en début de prochaine session)
 
 - [x] Commiter le travail en cours (fait au fil des sessions) — dernier lot : méthodologie v2.0.0 (pénalités par pilier) + refonte de la vue rapport + nouveaux composants + doc resynchronisée.
-- [ ] Ajouter `reports/` au `.gitignore` (exports générés ; `logs/` y est déjà).
+- [x] ~~Ajouter `reports/` au `.gitignore`~~ → **décision inversée (30/06)** : les rapports `.md` sont désormais **versionnés** dans `reports/` (un fichier par analyse, `<ticker>-due-diligence-<date>.md`). Écrits automatiquement par le pipeline à la complétion (`src/lib/reportFile.ts`), régénérables via `pnpm export-reports`.
 - [ ] Créer `.env.example` documentant toutes les variables (les 4 actuelles + `COINGECKO_API_KEY`, `GITHUB_TOKEN`, `CLAUDE_QUAL_MODEL`).
 - [ ] Renseigner dans `.env.local` : `COINGECKO_API_KEY` (clé Demo gratuite, déjà supportée par `src/engine/fetchers/coingecko.ts`) et `GITHUB_TOKEN` (déjà supporté, 60 req/h sans token sinon).
 
@@ -52,6 +52,7 @@ Le cœur de la valeur du produit. Un seul projet analysé (Aave) ne calibre rien
 - [ ] **Panel de calibration** : lancer le pipeline sur ~8-10 tokens contrastés — blue chip DeFi (Aave ✓), mid-cap DeFi (Curve, GMX), L1 (Solana, Avalanche), meme (DOGE, PEPE), small cap récente, projet notoirement risqué. Vérifier que le classement relatif des verdicts est défendable.
 - [x] **Règle des vetos → pénalités par pilier (v2.0.0, 30/06)** : plus de plafonds durs. Un red flag pénalise le pilier d'origine (critical 40 / major 14 / minor 3, en √n), sans plancher. Volume entièrement retiré du scoring (red flag + composant) ; `HIDDEN_MINT` resserré (faux positif NTT/Centrifuge) ; bug d'unité concentration corrigé ; garde-fou « critical contrat » (honeypot / non vérifié / taxe extrême → verdict ≤ surveiller). **Reste ouvert** : calibrer les 3 constantes de pénalité sur un plus grand panel.
 - [ ] **Stabilité du qualitatif** : la partie Claude varie d'un run à l'autre (recherche web). Contraindre davantage le prompt de `src/engine/qualitative.ts` (sources exigées, format de citation) et mesurer la variance sur 3 runs d'un même token.
+- [x] **Vulgarisation (30/06)** : socle de style partagé `VULGARIZATION_GUIDE` (`src/engine/vulgarization.ts`) injecté dans le prompt qualitatif (analyses futures). Repasse des analyses existantes via `pnpm vulgarize` (`--apply`) : réécrit la prose en accessible **sans re-fetch ni re-run**, depuis `raw_data.qualitative_original` (réversible), scores/sources/sévérités/chiffres préservés par fusion en code + garde-fou de préservation des nombres. Côté déterministe : tooltips de lexique (`Hint`/`glossary.ts`) sur les chiffres clés et l'annexe + section « Lexique » dans le `.md`.
 - [x] **Re-scoring sans re-fetch** : `scripts/rescore.ts` rejoue le scoring de toutes les analyses depuis `raw_data` (pas de re-fetch ni de re-run Claude), dry-run par défaut, `--apply` pour écrire, idempotent. Utilisé pour migrer les 10 analyses en v2.0.0.
 
 ## Phase 5 — UX/UI niveau V1

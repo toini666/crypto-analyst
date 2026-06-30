@@ -34,6 +34,8 @@ import {
   formatRatio,
   scoreColor,
 } from "@/lib/format";
+import { GLOSSARY, type GlossaryKey } from "@/lib/glossary";
+import { Hint } from "./Hint";
 import { ScoreDial } from "./ScoreDial";
 import { ScoreBar } from "./ScoreBar";
 import { VerdictBadge } from "./VerdictBadge";
@@ -233,16 +235,21 @@ function KeyMetric({
   value,
   context,
   contextColor,
+  hint,
 }: {
   label: string;
   value: string;
   context?: string;
   contextColor?: string;
+  hint?: GlossaryKey;
 }) {
   const missing = value === "n/d";
   return (
     <div className="rounded-lg border border-border bg-surface/40 px-4 py-3">
-      <div className="font-mono text-[0.7rem] uppercase tracking-wider text-faint">{label}</div>
+      <div className="flex items-center gap-1 font-mono text-[0.7rem] uppercase tracking-wider text-faint">
+        <span>{label}</span>
+        {hint && <Hint label={GLOSSARY[hint].term} text={GLOSSARY[hint].def} />}
+      </div>
       <div
         className={`mt-1.5 font-mono text-xl font-semibold tabular-nums ${
           missing ? "text-faint/70" : "text-ink"
@@ -273,27 +280,32 @@ function KeyMetrics({ m }: { m: Metrics }) {
           label="Market Cap"
           value={formatMoney(m.marketCapUsd)}
           context={m.marketCapRank != null ? `rang #${m.marketCapRank}` : undefined}
+          hint="marketCap"
         />
         <KeyMetric
           label="TVL"
           value={formatMoney(m.tvlUsd)}
           context={m.tvlChange30dPct != null ? `${formatPctSigned(m.tvlChange30dPct)} / 30 j` : undefined}
           contextColor={deltaColor(m.tvlChange30dPct)}
+          hint="tvl"
         />
         <KeyMetric
           label="Revenus ann."
           value={formatMoney(m.annualizedRevenueUsd)}
           context={m.psRatio != null ? `P/S ${formatRatio(m.psRatio, 1)}` : undefined}
+          hint="revenue"
         />
         <KeyMetric
           label="MC/FDV"
           value={formatRatio(m.mcFdvRatio)}
           context={m.circulatingPct != null ? `${formatPct(m.circulatingPct, 0)} circulant` : undefined}
+          hint="mcFdv"
         />
         <KeyMetric
           label="Volume/MC"
           value={formatPct(m.volumeMcRatio == null ? null : m.volumeMcRatio * 100)}
           context="liquidité 24 h"
+          hint="volumeMc"
         />
       </div>
     </section>

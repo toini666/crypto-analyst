@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "analyze": "tsx scripts/run-analysis.ts",
+    "vulgarize": "tsx scripts/vulgarize.ts",
+    "export-reports": "tsx scripts/export-reports.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

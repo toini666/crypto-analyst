@@ -8,6 +8,7 @@ import { spawn } from "node:child_process";
 import os from "node:os";
 import { z } from "zod";
 import type { Metrics, QualitativeResult, RedFlag } from "@/lib/types";
+import { VULGARIZATION_GUIDE } from "./vulgarization";
 
 const redFlagSchema = z.object({
   severity: z.enum(["critical", "major", "minor"]),
@@ -65,6 +66,9 @@ Règles impératives :
   utilité du token, calendrier d'unlocks (Tokenomist, CryptoRank, docs officielles), audits
   (CertiK, Trail of Bits…), comparables du même narratif, mindshare récent.
 - Ton neutre, analytique, professionnel. Français.
+
+${VULGARIZATION_GUIDE}
+
 - Chaque section : score /100 calibré (50 = moyenne du marché, 80+ = exceptionnel, ≤30 = défaillant),
   resume en une phrase percutante, analyse argumentée (150-250 mots), red_flags explicites
   (uniquement les VRAIS signaux d'alerte, liste vide sinon), sources (URLs consultées).
