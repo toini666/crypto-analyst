@@ -1,0 +1,53 @@
+[span] Crypto Analyst
+[a] Analyses
+[a] Portefeuille
+[span] Méthodologie v
+[span] 2.0.0
+[span] Un score, un verdict, des sources
+[h1] Une note sur 100 que vous pouvez défendre.
+[p] Chaque verdict repose sur 6 piliers chiffrés, des red flags explicites et des données horodatées — pas sur l'humeur d'un thread. Téléchargeable, traçable, reproductible.
+[a] Analyser un projet
+[a] Analyser mon portefeuille
+[span] Aave
+[span] AAVE
+[div] DeFi — lending (blue chip)
+[span] À privilégier
+[span] Confiance élevée
+[span] Fondamentaux
+[span] Tokenomics
+[span] Traction on-chain
+[div] Le problème
+[h2] Faire sa propre due diligence, c'est un travail à plein temps.
+[div] Des analyses biaisées
+[p] Threads, vidéos, « appels » : l'essentiel des contenus crypto est promotionnel. Distinguer la recherche de la publicité demande une vigilance constante.
+[div] Des données éparpillées
+[p] Prix, TVL, sécurité du contrat, activité dev : chaque chiffre vit dans un outil différent, jamais réconcilié ni comparé au même endroit.
+[div] Aucune vue d'ensemble
+[p] Même en analysant chaque token, vous ignorez si votre portefeuille, dans son ensemble, est sain — ou concentré sur un seul pari.
+[div] La réponse
+[h2] Un pipeline déterministe. Aucun chiffre inventé.
+[p] L'outil collecte les données publiques, calcule des métriques horodatées, puis note le projet sur 6 piliers. L'analyse qualitative est rédigée à partir de ces chiffres — jamais l'inverse. Toute donnée manquante est affichée « n/d », jamais estimée.
+[span] Fondamentaux
+[span] Tokenomics
+[span] Traction on-chain
+[span] Marché & valorisation
+[span] Social & mindshare
+[span] Sécurité & risques
+[div] sources publiques
+[div] étapes de pipeline
+[div] piliers notés
+[div] chiffre inventé
+[div] Deux outils, une méthode
+[h2] Du token au portefeuille.
+[div] Analyse de projet
+[p] Une due diligence complète sur un token : score sur 100, verdict, red flags, les 6 piliers détaillés et toutes les sources horodatées.
+[a] Analyser un projet
+[span] Nouveau
+[div] Analyse de portefeuille
+[p] Donnez vos positions : l'outil évalue la concentration, la diversification sectorielle, la qualité moyenne pondérée et l'exposition au risque — et propose un rééquilibrage.
+[a] Analyser mon portefeuille
+[h2] Prêt à arrêter de deviner ?
+[p] Lancez une analyse de projet ou chargez votre portefeuille pour obtenir un diagnostic immédiat.
+[a] Analyser un projet
+[a] Analyser mon portefeuille
+[p] Crypto Analyst produit une recherche personnelle générée automatiquement à partir de données publiques sourcées et horodatées. Ne constitue pas un conseil en investissement.

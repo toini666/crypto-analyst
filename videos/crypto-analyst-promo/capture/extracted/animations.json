@@ -1,0 +1,215 @@
+{
+  "summary": {
+    "webAnimations": 4,
+    "cssDeclarations": 25,
+    "scrollTargets": 0,
+    "cdpAnimations": 100,
+    "canvases": 0
+  },
+  "namedAnimations": [
+    "aurora-drift",
+    "step-pulse",
+    "card-float",
+    "card-sheen"
+  ],
+  "scrollTriggeredElements": 0,
+  "representativeAnimations": [
+    {
+      "type": "CSSAnimation",
+      "playState": "running",
+      "animationName": "aurora-drift",
+      "targetSelector": "div.hero-aurora.absolute.inset-0",
+      "targetRect": {
+        "x": 314.7803955078125,
+        "y": -76.29763793945312,
+        "width": 1378.84765625,
+        "height": 717.185791015625,
+        "top": -76.29763793945312,
+        "right": 1693.6280517578125,
+        "bottom": 640.8881530761719,
+        "left": 314.7803955078125
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "opacity": "0.5",
+          "transform": "translate3d(-5%, -3%, 0px) scale(1)",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.5,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "opacity": "0.9",
+          "transform": "translate3d(5%, 3%, 0px) scale(1.18)",
+          "computedOffset": 0.5
+        },
+        {
+          "offset": 1,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "opacity": "0.5",
+          "transform": "translate3d(-5%, -3%, 0px) scale(1)",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 16000,
+        "delay": 0,
+        "iterations": null,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    },
+    {
+      "type": "CSSAnimation",
+      "playState": "running",
+      "animationName": "step-pulse",
+      "targetSelector": "span.size-[7px].rounded-full.bg-primary",
+      "targetRect": {
+        "x": 377,
+        "y": 114,
+        "width": 7,
+        "height": 7,
+        "top": 114,
+        "right": 384,
+        "bottom": 121,
+        "left": 377
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "opacity": "1",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.5,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "opacity": "0.45",
+          "computedOffset": 0.5
+        },
+        {
+          "offset": 1,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "opacity": "1",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 1600,
+        "delay": 0,
+        "iterations": null,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    },
+    {
+      "type": "CSSAnimation",
+      "playState": "running",
+      "animationName": "card-float",
+      "targetSelector": "div.hero-card-stage",
+      "targetRect": {
+        "x": 1136,
+        "y": 148.82725524902344,
+        "width": 420,
+        "height": 231.75001525878906,
+        "top": 148.82725524902344,
+        "right": 1556,
+        "bottom": 380.5772705078125,
+        "left": 1136
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "transform": "translateY(0px)",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.5,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "transform": "translateY(-8px)",
+          "computedOffset": 0.5
+        },
+        {
+          "offset": 1,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "transform": "translateY(0px)",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 7000,
+        "delay": 0,
+        "iterations": null,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    },
+    {
+      "type": "CSSAnimation",
+      "playState": "running",
+      "animationName": "card-sheen",
+      "targetSelector": "span.card-sheen.pointer-events-none.absolute",
+      "targetRect": {
+        "x": 846.2940063476562,
+        "y": 149.82725524902344,
+        "width": 196.61126708984375,
+        "height": 229.75001525878906,
+        "top": 149.82725524902344,
+        "right": 1042.9052734375,
+        "bottom": 379.5772705078125,
+        "left": 846.2940063476562
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "opacity": "0",
+          "transform": "translateX(-140%) skewX(-14deg)",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.08,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "opacity": "0.55",
+          "computedOffset": 0.08
+        },
+        {
+          "offset": 0.26,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "opacity": "0",
+          "transform": "translateX(160%) skewX(-14deg)",
+          "computedOffset": 0.26
+        },
+        {
+          "offset": 1,
+          "easing": "ease-in-out",
+          "composite": "auto",
+          "opacity": "0",
+          "transform": "translateX(160%) skewX(-14deg)",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 8000,
+        "delay": 1400,
+        "iterations": null,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    }
+  ]
+}

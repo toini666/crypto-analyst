@@ -216,10 +216,11 @@ export default function LandingPage() {
         aria-label="Accroche"
         className="relative isolate pt-12"
       >
-        {/* Ambiance : aura ambrée + grille fine, derrière le contenu */}
+        {/* Ambiance : aura ambrée + grille fine, pleine largeur, fondue dans la
+            page par un masque radial (aucune bordure de rectangle). */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 -top-24 -z-10 h-[620px] overflow-hidden"
+          className="hero-ambiance pointer-events-none absolute -top-40 left-1/2 -z-10 h-[760px] w-screen max-w-none -translate-x-1/2"
         >
           <div className="hero-grid absolute inset-0" />
           <div className="hero-aurora absolute inset-0" />

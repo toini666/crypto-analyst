@@ -6,7 +6,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Crypto Analyst — règles projet
 
-Moteur personnel de due diligence crypto. Lire `CADRAGE.md` (méthodologie), `PRODUCT.md` et `DESIGN.md` (design) avant toute évolution significative. `ROADMAP.md` trace l'état d'avancement vers la V1 : la consulter en début de session, cocher/mettre à jour en fin de session.
+Moteur personnel de due diligence crypto. Deux surfaces : **analyse projet** (nom + ticker → rapport noté) et **analyse portefeuille** (`/portfolio`, diagnostic déterministe). Lire `CADRAGE.md` (méthodologie), `PRODUCT.md` et `DESIGN.md` (design) avant toute évolution significative. `ROADMAP.md` trace l'état d'avancement vers la V1 : la consulter en début de session, cocher/mettre à jour en fin de session.
+
+> **Méta-règle — tenir cette doc à jour.** Ce fichier (`AGENTS.md`, importé par `CLAUDE.md`) est la source de vérité opérationnelle pour tout agent. À chaque changement notable — architecture, invariant, nouvelle commande/script, source de données, dépendance structurante, ou toute décision qu'un futur agent devrait connaître — **mets à jour ce fichier dans le même lot que le code**, et répercute sur les docs concernées (`README.md`, `ROADMAP.md`, et selon le sujet `CADRAGE.md` / `PRODUCT.md` / `DESIGN.md`). N'attends pas qu'on te le demande : une doc qui décrit un état révolu est pire que pas de doc.
 
 ## Invariants (décisions utilisateur, ne pas remettre en cause)
 
@@ -14,7 +16,7 @@ Moteur personnel de due diligence crypto. Lire `CADRAGE.md` (méthodologie), `PR
 - **SQLite local** comme backend (fichier `./data/app.db`, via `better-sqlite3`, mode WAL) — **pas de Supabase, pas de Docker, pas de serveur**. Historique : Supabase écarté car le plan gratuit plafonne à 2 projets, déjà utilisés (décision 18/06/2026). Toute la persistance passe par `src/lib/db/` ; deux processus partagent le fichier (serveur Next.js + runner détaché `scripts/run-analysis.ts`). Le navigateur n'accède jamais au fichier : il lit via les routes API (`GET`) et **rafraîchit par polling** (le Realtime de Supabase a été remplacé). App mono-utilisateur 100 % locale : pas d'auth, pas de RLS.
 - **Budget données : 0 €** — CoinGecko, DeFiLlama, GoPlus, GitHub gratuits uniquement.
 - **Pas d'analyse technique court terme** (tendance, momentum) ; la position prix vs ATH est en revanche une info voulue.
-- Toute modification des poids/seuils/pénalités de red flags (et garde-fous) se fait dans `src/engine/methodology.ts` et **incrémente `METHODOLOGY_VERSION`**. Les red flags ne plafonnent plus le score (v2.0.0) : ils pénalisent leur pilier d'origine, sauf le garde-fou « critical contrat » (honeypot / non vérifié / taxe extrême) qui plafonne à 69.
+- Toute modification des poids/seuils/pénalités de red flags (et garde-fous) se fait dans `src/engine/methodology.ts` et **incrémente `METHODOLOGY_VERSION`**. Les red flags ne plafonnent plus le score (v2.0.0) : ils pénalisent leur pilier d'origine, sauf le garde-fou « critical contrat » (honeypot / non vérifié / taxe extrême) qui plafonne à 69. Le **scoring portefeuille** est versionné séparément dans le même fichier (`PORTFOLIO_METHODOLOGY_VERSION`, consommé par `src/engine/portfolio.ts`) : toute évolution de ses poids/seuils **incrémente cette constante**.
 
 ## Commandes
 

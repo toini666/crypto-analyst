@@ -1,0 +1,10 @@
+{
+  "bgm": {
+    "path": "assets/bgm/track.mp3",
+    "volume": 0.9,
+    "query": "tense, minimal, cinematic-analytical — low steady pulse, dark ambient, restrained; NO hype, NO EDM, NO risers. The sound of investment research late at night.",
+    "duration_s": 31
+  },
+  "voices": [],
+  "sfx": []
+}

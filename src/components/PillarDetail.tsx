@@ -69,65 +69,87 @@ function ComponentDetail({
   const table =
     component.id === "comparables" && qual ? qual.sections.comparables.table : null;
 
+  const originLabel = component.origin === "quant" ? "déterministe" : "recherche";
+
   return (
-    <div className="py-4 first:pt-0 last:pb-0">
-      <div className="flex items-baseline justify-between gap-4">
-        <h4 className="text-sm font-medium text-ink">
-          {component.label}
-          <span className="ml-2 font-mono text-[0.7rem] uppercase tracking-wide text-faint">
-            {component.origin === "quant" ? "déterministe" : "recherche"}
+    <div className="grid gap-x-9 gap-y-4 py-6 first:pt-2 last:pb-2 sm:grid-cols-[minmax(0,13rem)_1fr]">
+      {/* Rail : intitulé, origine et score mis en avant */}
+      <div className="flex items-start justify-between gap-4 sm:flex-col sm:justify-start sm:gap-3.5">
+        <div className="min-w-0">
+          <h4 className="text-[0.9375rem] font-medium leading-snug text-ink text-balance">
+            {component.label}
+          </h4>
+          <span className="mt-1.5 inline-flex items-center gap-1.5 font-mono text-[0.6875rem] uppercase tracking-wide text-faint">
+            <span aria-hidden className="size-1 rounded-full bg-faint" />
+            {originLabel}
           </span>
-        </h4>
-        <ScoreChip score={component.score} />
+        </div>
+        <div className="shrink-0 sm:w-full">
+          <div className="flex items-baseline justify-end gap-1 sm:justify-start">
+            <span
+              className="font-mono text-[1.75rem] font-semibold leading-none tabular-nums"
+              style={{ color: scoreColor(component.score) }}
+            >
+              {component.score == null ? "n/d" : component.score}
+            </span>
+            {component.score != null && (
+              <span className="font-mono text-xs text-faint">/100</span>
+            )}
+          </div>
+          <ScoreBar score={component.score} className="mt-2.5 ml-auto w-24 sm:ml-0 sm:w-40" />
+        </div>
       </div>
 
-      {section ? (
-        <div className="mt-2">
-          {section.resume && (
-            <p className="max-w-[68ch] text-[0.9375rem] leading-relaxed text-ink">
-              {section.resume}
-            </p>
-          )}
-          {section.analyse && (
-            <p className="mt-2 max-w-[72ch] text-[0.9375rem] leading-relaxed text-muted">
-              {section.analyse}
-            </p>
-          )}
-          {table && table.length > 0 && (
-            <div className="mt-3 overflow-x-auto">
-              <table className="w-full border-collapse text-sm">
-                <thead>
-                  <tr className="text-left text-xs text-faint">
-                    <th className="py-1.5 pr-3 font-medium">Projet</th>
-                    <th className="py-1.5 pr-3 font-medium">Market Cap</th>
-                    <th className="py-1.5 pr-3 font-medium">FDV</th>
-                    <th className="py-1.5 font-medium">Commentaire</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {table.map((r, i) => (
-                    <tr key={i} className="border-t border-border/60 align-top">
-                      <td className="py-2 pr-3 font-medium text-ink">{r.nom}</td>
-                      <td className="py-2 pr-3 font-mono text-xs tabular-nums text-muted">
-                        {r.market_cap}
-                      </td>
-                      <td className="py-2 pr-3 font-mono text-xs tabular-nums text-muted">
-                        {r.fdv}
-                      </td>
-                      <td className="py-2 text-xs text-muted">{r.commentaire}</td>
+      {/* Analyse : résumé (accroche) + détail + sources */}
+      <div className="min-w-0">
+        {section ? (
+          <>
+            {section.resume && (
+              <p className="max-w-[70ch] text-pretty text-base leading-relaxed text-ink">
+                {section.resume}
+              </p>
+            )}
+            {section.analyse && (
+              <p className="mt-3 max-w-[72ch] text-pretty text-[0.9375rem] leading-relaxed text-muted">
+                {section.analyse}
+              </p>
+            )}
+            {table && table.length > 0 && (
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="text-left text-xs text-faint">
+                      <th className="py-1.5 pr-3 font-medium">Projet</th>
+                      <th className="py-1.5 pr-3 font-medium">Market Cap</th>
+                      <th className="py-1.5 pr-3 font-medium">FDV</th>
+                      <th className="py-1.5 font-medium">Commentaire</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          <SourceLinks sources={section.sources} />
-        </div>
-      ) : (
-        <p className="mt-2 max-w-[72ch] text-[0.9375rem] leading-relaxed text-muted">
-          {component.basis}
-        </p>
-      )}
+                  </thead>
+                  <tbody>
+                    {table.map((r, i) => (
+                      <tr key={i} className="border-t border-border/60 align-top">
+                        <td className="py-2 pr-3 font-medium text-ink">{r.nom}</td>
+                        <td className="py-2 pr-3 font-mono text-xs tabular-nums text-muted">
+                          {r.market_cap}
+                        </td>
+                        <td className="py-2 pr-3 font-mono text-xs tabular-nums text-muted">
+                          {r.fdv}
+                        </td>
+                        <td className="py-2 text-xs text-muted">{r.commentaire}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <SourceLinks sources={section.sources} />
+          </>
+        ) : (
+          <p className="max-w-[72ch] text-pretty text-[0.9375rem] leading-relaxed text-muted">
+            {component.basis}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

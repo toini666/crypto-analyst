@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- head is metadata for the source file only; the runtime clones ONLY <template> contents -->
+  </head>
+  <body>
+    <template>
+      <style>
+        @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400;font-display:block;src:url('assets/fonts/plex-sans-400.woff2') format('woff2');}
+        @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:600;font-display:block;src:url('assets/fonts/plex-sans-600.woff2') format('woff2');}
+        @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:700;font-display:block;src:url('assets/fonts/plex-sans-700.woff2') format('woff2');}
+        @font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:block;src:url('assets/fonts/plex-mono-400.woff2') format('woff2');}
+        @font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:600;font-display:block;src:url('assets/fonts/plex-mono-600.woff2') format('woff2');}
+
+        /* Root styled by #root ONLY (a class on the root is scoped to a descendant and silently drops). */
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 1920px;
+          height: 1080px;
+          overflow: hidden;
+          font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        /* Full-bleed ground on its OWN clip layer — solid near-black (no gradient: H.264 banding). */
+        .bg {
+          position: absolute;
+          inset: 0;
+          background: #0B0D11;
+        }
+
+        /* Transparent full-bleed stage holding the scattered fragments + the resolve line. */
+        .stage {
+          position: absolute;
+          inset: 0;
+        }
+
+        /* Scattered MONO data labels — fragmentation IS the layout. Three depth layers via opacity. */
+        .label {
+          position: absolute;
+          will-change: transform;
+        }
+        .label-rev {
+          will-change: transform, opacity;
+        }
+        .label-txt {
+          display: inline-block;
+          font-family: 'IBM Plex Mono', monospace;
+          font-variant-numeric: tabular-nums;
+          color: #E8EAEE;
+          white-space: nowrap;
+          will-change: transform;
+        }
+        .label.near .label-txt   { font-size: 58px; font-weight: 600; letter-spacing: 0.005em; }
+        .label.mid .label-txt    { font-size: 50px; font-weight: 600; letter-spacing: 0.01em; }
+        .label.far .label-txt    { font-size: 44px; font-weight: 400; letter-spacing: 0.02em; }
+        .label.faint .label-txt  { font-size: 40px; font-weight: 400; letter-spacing: 0.03em; }
+
+        /* Resolve line — Sans, lower-center, still. "Jamais réconcilié" near-white emphasis. */
+        .rline {
+          position: absolute;
+          top: 732px;
+          left: 50%;
+          transform: translateX(-50%);
+          white-space: nowrap;
+          font-family: 'IBM Plex Sans', sans-serif;
+          font-size: 50px;
+          line-height: 1.2;
+          text-align: center;
+        }
+        .rline .w {
+          display: inline-block;
+          color: #9AA3B2;
+          font-weight: 400;
+          letter-spacing: -0.01em;
+          margin-right: 0.30em;
+          will-change: transform, opacity;
+        }
+        .rline .w.last { margin-right: 0; }
+        .rline .w.em {
+          color: #E8EAEE;
+          font-weight: 600;
+        }
+      </style>
+
+      <div id="root" data-composition-id="02-pain" data-width="1920" data-height="1080">
+        <!-- track 0 — full-bleed ground -->
+        <div class="bg clip" data-start="0" data-duration="4" data-track-index="0"></div>
+
+        <!-- track 1 — fragments + resolve line -->
+        <div class="stage clip" data-start="0" data-duration="4" data-track-index="1">
+          <!-- Scattered, disconnected — rule-of-thirds spread, 3 depth layers -->
+          <div class="label near" id="lab-prix" style="left:330px; top:228px;">
+            <div class="label-rev" id="lab-prix-rev"><span class="label-txt" id="lab-prix-txt">Prix</span></div>
+          </div>
+          <div class="label faint" id="lab-tvl" style="left:1540px; top:178px;">
+            <div class="label-rev" id="lab-tvl-rev"><span class="label-txt" id="lab-tvl-txt">TVL</span></div>
+          </div>
+          <div class="label far" id="lab-sec" style="left:1188px; top:432px;">
+            <div class="label-rev" id="lab-sec-rev"><span class="label-txt" id="lab-sec-txt">Sécurité du contrat</span></div>
+          </div>
+          <div class="label mid" id="lab-dev" style="left:292px; top:470px;">
+            <div class="label-rev" id="lab-dev-rev"><span class="label-txt" id="lab-dev-txt">Activité dev</span></div>
+          </div>
+
+          <!-- Resolve line, lower-center -->
+          <div class="rline" id="rline">
+            <span class="w">Chaque</span><span class="w">chiffre</span><span class="w">vit</span><span class="w">ailleurs.</span><span class="w em">Jamais</span><span class="w em last">réconcilié.</span>
+          </div>
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+      <script>
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Scope every query to THIS frame's root so generic ids/classes can't cross-match a
+        // sibling frame once all six compositions assemble into one document.
+        const root = document.querySelector('[data-composition-id="02-pain"]');
+        const q = (sel) => root.querySelector(sel);
+
+        // Each fragment: outer .label carries the center-outward NUDGE (x/y);
+        // inner .label-rev carries the ENTRANCE (opacity/y/scale) + the scene-3 DIM;
+        // innermost span carries the scene-3 subtle JITTER. Splitting the props across
+        // wrappers keeps every entrance a clean seek-safe fromTo with no immediateRender clobber.
+        const LABELS = [
+          // reveal in copy order: Prix · TVL · Sécurité du contrat · Activité dev
+          { out:'#lab-prix', rev:'#lab-prix-rev', txt:'#lab-prix-txt', reveal:0.10, base:0.95, dim:0.62, dx:-30, dy:-22, ph:0.0 },
+          { out:'#lab-tvl',  rev:'#lab-tvl-rev',  txt:'#lab-tvl-txt',  reveal:0.50, base:0.50, dim:0.33, dx: 32, dy:-24, ph:1.7 },
+          { out:'#lab-sec',  rev:'#lab-sec-rev',  txt:'#lab-sec-txt',  reveal:0.90, base:0.72, dim:0.46, dx: 30, dy:-12, ph:3.2 },
+          { out:'#lab-dev',  rev:'#lab-dev-rev',  txt:'#lab-dev-txt',  reveal:1.30, base:0.85, dim:0.55, dx:-30, dy:-8,  ph:4.7 },
+        ].map((L) => ({ ...L, outEl: q(L.out), revEl: q(L.rev), txtEl: q(L.txt) }));
+
+        // Scene 1 (0.0–1.8s) — fragments reveal SEQUENTIALLY, each lands solo (power3 long-tail).
+        LABELS.forEach((L) => {
+          tl.fromTo(L.revEl,
+            { opacity: 0, y: 18, scale: 0.965 },
+            { opacity: L.base, y: 0, scale: 1, duration: 0.48, ease: 'power3.out' },
+            L.reveal);
+        });
+
+        // Scene 2 (1.8–3.0s) — finite low-amplitude center-outward nudge: the fragments drift
+        // a little further apart to read as "never reconciled".
+        LABELS.forEach((L) => {
+          tl.fromTo(L.outEl,
+            { x: 0, y: 0 },
+            { x: L.dx, y: L.dy, duration: 1.0, ease: 'power2.out' },
+            1.8);
+        });
+
+        // Scene 2 — resolve line reveals per-word across lower-center.
+        tl.fromTo(root.querySelectorAll('.rline .w'),
+          { opacity: 0, y: 16 },
+          { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.11 },
+          2.0);
+
+        // Scene 3 (3.0–4.0s) — fragments dim at the edges (settle, not exit — they stay visible).
+        // Must be .to (not fromTo): a fromTo would immediateRender opacity:1 at t=0 and wipe the
+        // entrance from-state.
+        LABELS.forEach((L) => {
+          tl.to(L.revEl, { opacity: L.dim, duration: 0.7, ease: 'power2.out' }, 3.0);
+        });
+
+        // Scene 3 — subtle jitter only (sine-wave-loop, LOW amplitude). 4 concurrent elements →
+        // amplitude ≈ default / √4. Zeroed at phase 0 so there is no jump into the hold. The
+        // resolve line stays perfectly still.
+        const jitNodes = LABELS.map((L) => ({ el: L.txtEl, ph: L.ph }));
+        const AMP = 1.6; // px
+        const phase = { p: 0 };
+        tl.to(phase, {
+          p: Math.PI * 2 * 1.5,
+          duration: 1.0,
+          ease: 'none',
+          onUpdate: () => {
+            const p = phase.p;
+            jitNodes.forEach((n) => {
+              const a = p + n.ph;
+              const jx = (Math.sin(a) - Math.sin(n.ph)) * AMP;
+              const jy = (Math.sin(a + Math.PI / 2) - Math.sin(n.ph + Math.PI / 2)) * (AMP * 0.7);
+              n.el.style.transform = 'translate(' + jx + 'px, ' + jy + 'px)';
+            });
+          },
+        }, 3.0);
+
+        window.__timelines['02-pain'] = tl;
+      </script>
+    </template>
+  </body>
+</html>

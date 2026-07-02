@@ -1,0 +1,228 @@
+<template>
+  <div
+    id="root"
+    data-composition-id="06-cta"
+    data-start="0"
+    data-duration="4.5"
+    data-width="1920"
+    data-height="1080"
+  >
+    <style>
+      /* ── Brand fonts (verbatim) ───────────────────────────────────── */
+      @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400;font-display:block;src:url('assets/fonts/plex-sans-400.woff2') format('woff2');}
+      @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:600;font-display:block;src:url('assets/fonts/plex-sans-600.woff2') format('woff2');}
+      @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:700;font-display:block;src:url('assets/fonts/plex-sans-700.woff2') format('woff2');}
+      @font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:block;src:url('assets/fonts/plex-mono-400.woff2') format('woff2');}
+      @font-face{font-family:'Newsreader';font-style:italic;font-weight:500;font-display:block;src:url('assets/fonts/newsreader-500-italic.woff2') format('woff2');}
+
+      /* ── Root (sized box; styled via #root, never a class) ─────────── */
+      #root{
+        position:relative;
+        width:1920px;
+        height:1080px;
+        overflow:hidden;
+        background:transparent;
+        font-family:'IBM Plex Sans',sans-serif;
+      }
+
+      /* Full-bleed ground on its OWN clip layer (never on #root) */
+      #root .ground{
+        position:absolute;
+        inset:0;
+        background:#0B0D11;
+      }
+
+      /* Restrained amber bloom behind the CTA (track below content) */
+      #root .bloom{
+        position:absolute;
+        left:50%;
+        top:52%;
+        width:1180px;
+        height:1180px;
+        margin-left:-590px;
+        margin-top:-590px;
+        background:radial-gradient(circle at center,
+          rgba(217,161,59,0.50) 0%,
+          rgba(217,161,59,0.14) 40%,
+          rgba(217,161,59,0) 70%);
+        opacity:0;
+        transform-origin:50% 50%;
+        pointer-events:none;
+        will-change:transform,opacity;
+      }
+
+      /* Content layer */
+      #root .content{
+        position:absolute;
+        inset:0;
+      }
+
+      #root .cluster{
+        position:absolute;
+        inset:0;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        gap:46px;
+      }
+
+      /* Serif callback line — Newsreader ITALIC 500, near-white */
+      #root .serif{
+        font-family:'Newsreader',serif;
+        font-style:italic;
+        font-weight:500;
+        font-size:60px;
+        line-height:1.2;
+        letter-spacing:0;
+        color:#E8EAEE;
+        text-align:center;
+        max-width:1200px;
+        will-change:transform;
+      }
+      #root .serif .w{
+        display:inline-block;
+        will-change:transform,opacity;
+      }
+
+      /* The ONE solid amber element — the CTA pill */
+      #root .cta{
+        display:inline-block;
+        font-family:'IBM Plex Sans',sans-serif;
+        font-weight:600;
+        font-size:32px;
+        letter-spacing:-0.01em;
+        line-height:1;
+        color:#0B0D11;
+        background:#D9A13B;
+        border:none;
+        border-radius:100px;
+        padding:26px 58px;
+        transform-origin:50% 50%;
+        cursor:default;
+        will-change:transform,opacity;
+      }
+
+      /* Wordmark — amber rounded square + Crypto Analyst */
+      #root .wordmark{
+        display:flex;
+        align-items:center;
+        gap:13px;
+        will-change:transform,opacity;
+      }
+      #root .wm-square{
+        display:block;
+        width:27px;
+        height:27px;
+        border-radius:7px;
+        background:#D9A13B;
+      }
+      #root .wm-text{
+        font-family:'IBM Plex Sans',sans-serif;
+        font-weight:600;
+        font-size:25px;
+        letter-spacing:-0.01em;
+        color:#E8EAEE;
+      }
+
+      /* Bottom micro-line — Mono 400 tabular-nums, meta color */
+      #root .micro{
+        position:absolute;
+        left:0;
+        right:0;
+        bottom:200px;
+        text-align:center;
+        font-family:'IBM Plex Mono',monospace;
+        font-weight:400;
+        font-size:17px;
+        letter-spacing:0.02em;
+        color:#5C6470;
+        font-variant-numeric:tabular-nums;
+        will-change:transform,opacity;
+      }
+    </style>
+
+    <!-- track 0 — full-bleed ground -->
+    <div class="clip ground" data-start="0" data-duration="4.5" data-track-index="0"></div>
+
+    <!-- track 1 — amber bloom behind the CTA -->
+    <div class="clip bloom" id="cta-bloom" data-start="0" data-duration="4.5" data-track-index="1"></div>
+
+    <!-- track 2 — content -->
+    <div class="clip content" id="cta-content" data-start="0" data-duration="4.5" data-track-index="2">
+      <div class="cluster">
+        <div class="serif" id="cta-serif"><span class="w">Une</span> <span class="w">note</span> <span class="w">que</span> <span class="w">vous</span> <span class="w">pouvez</span> <span class="w">défendre.</span></div>
+        <button class="cta" id="cta-pill" type="button">Analyser un projet</button>
+        <div class="wordmark" id="cta-wordmark">
+          <span class="wm-square"></span>
+          <span class="wm-text">Crypto Analyst</span>
+        </div>
+      </div>
+      <div class="micro" id="cta-micro">0 € de données · 100 % local · aucun chiffre inventé</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      /* ── Scene 1 (0.0–1.4s) — the serif callback reveals per-word, ──────
+         centered near canvas-center (the line sits +120 below its resting
+         spot so it reads centred while it's alone on the field). */
+      tl.fromTo(
+        "#cta-serif",
+        { y: 120 },
+        { y: 0, duration: 0.85, ease: "power3.out" },
+        1.40
+      );
+      tl.fromTo(
+        "#cta-serif .w",
+        { opacity: 0, y: 26 },
+        { opacity: 1, y: 0, duration: 0.45, ease: "power3.out", stagger: 0.10 },
+        0.05
+      );
+
+      /* ── Scene 2 (1.4–2.8s) — the line settles upward, vacating centre;
+         the solid amber CTA CONDENSES in at that same centre (scale-swap
+         morph: 1.18 → 1.0 + fade), then a tactile press → smooth recovery
+         (press-release, no overshoot) stands in for the click. */
+      tl.fromTo(
+        "#cta-pill",
+        { scale: 1.18, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.55, ease: "power3.out" },
+        1.55
+      );
+      tl.to("#cta-pill", { scale: 0.965, duration: 0.12, ease: "power1.in" }, 2.10);
+      tl.to("#cta-pill", { scale: 1, duration: 0.50, ease: "power3.out" }, 2.22);
+
+      /* Restrained amber bloom blooms in behind the CTA, landing with the
+         press (pulse-on-arrival → ease down to a lower steady hold). */
+      const glow = document.getElementById("cta-bloom");
+      tl.fromTo(
+        glow,
+        { opacity: 0, scale: 0.85 },
+        { opacity: 0.30, scale: 1.04, duration: 0.90, ease: "power2.out" },
+        1.85
+      );
+      tl.to(glow, { opacity: 0.19, scale: 1.0, duration: 1.55, ease: "power2.inOut" }, 2.75);
+
+      /* ── Scene 3 (2.8–4.5s) — wordmark + micro-line resolve beneath the
+         CTA, then the whole lockup HOLDS (final frame; the bloom's ease-down
+         is the only settle — the call-to-action stays fully legible). */
+      tl.fromTo(
+        "#cta-wordmark",
+        { opacity: 0, y: 22 },
+        { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" },
+        2.85
+      );
+      tl.fromTo(
+        "#cta-micro",
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" },
+        3.10
+      );
+
+      window.__timelines["06-cta"] = tl;
+    </script>
+  </div>
+</template>

@@ -65,25 +65,30 @@ body {
 
 /* ── Landing : ambiance vivante — mouvement seul, palette & typo inchangées
    (cf. DESIGN.md « Motion »). Tout est coupé en prefers-reduced-motion. ── */
+/* Enveloppe : masque radial commun (grille + aura) — la lumière est concentrée
+   derrière le hero et se dissout de tous les côtés dans le fond de page.
+   Aucune bordure de rectangle : la coupe n'est jamais visible. */
+.hero-ambiance {
+  -webkit-mask-image: radial-gradient(78% 78% at 60% 22%, #000 0%, #000 30%, transparent 72%);
+          mask-image: radial-gradient(78% 78% at 60% 22%, #000 0%, #000 30%, transparent 72%);
+}
 @keyframes aurora-drift {
-  0%   { transform: translate3d(-5%, -3%, 0) scale(1);   opacity: 0.5; }
-  50%  { transform: translate3d(5%, 3%, 0) scale(1.18);  opacity: 0.9; }
-  100% { transform: translate3d(-5%, -3%, 0) scale(1);   opacity: 0.5; }
+  0%   { transform: translate3d(-4%, -2%, 0) scale(1);   opacity: 0.55; }
+  50%  { transform: translate3d(4%, 2%, 0) scale(1.14);  opacity: 0.9; }
+  100% { transform: translate3d(-4%, -2%, 0) scale(1);   opacity: 0.55; }
 }
 .hero-aurora {
   background:
-    radial-gradient(42% 55% at 72% 28%, rgba(217, 161, 59, 0.20), transparent 72%),
-    radial-gradient(48% 60% at 22% 70%, rgba(217, 161, 59, 0.09), transparent 72%);
+    radial-gradient(40% 52% at 66% 30%, rgba(217, 161, 59, 0.22), transparent 70%),
+    radial-gradient(46% 58% at 26% 64%, rgba(217, 161, 59, 0.08), transparent 72%);
   animation: aurora-drift 16s ease-in-out infinite;
   will-change: transform, opacity;
 }
 .hero-grid {
   background-image:
-    linear-gradient(to right, rgba(232, 234, 238, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(232, 234, 238, 0.025) 1px, transparent 1px);
+    linear-gradient(to right, rgba(232, 234, 238, 0.022) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(232, 234, 238, 0.022) 1px, transparent 1px);
   background-size: 46px 46px;
-  -webkit-mask-image: radial-gradient(62% 60% at 60% 32%, #000, transparent 78%);
-          mask-image: radial-gradient(62% 60% at 60% 32%, #000, transparent 78%);
 }
 @keyframes card-float {
   0%, 100% { transform: translateY(0); }

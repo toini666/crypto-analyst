@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- head is metadata for the source file only; the runtime ignores it -->
+  </head>
+  <body>
+    <template>
+      <style>
+        @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400;font-display:block;src:url('assets/fonts/plex-sans-400.woff2') format('woff2');}
+        @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:600;font-display:block;src:url('assets/fonts/plex-sans-600.woff2') format('woff2');}
+        @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:700;font-display:block;src:url('assets/fonts/plex-sans-700.woff2') format('woff2');}
+        @font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:block;src:url('assets/fonts/plex-mono-400.woff2') format('woff2');}
+        @font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:600;font-display:block;src:url('assets/fonts/plex-mono-600.woff2') format('woff2');}
+
+        /* Root styled by #root (never a class) — see sub-composition contract. */
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 1920px;
+          height: 1080px;
+          overflow: hidden;
+          font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        /* Full-bleed ground on its OWN clip layer, never on #root. */
+        .bg {
+          position: absolute;
+          inset: 0;
+          background: #0B0D11;
+        }
+
+        .stage {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 0 120px 132px;
+          box-sizing: border-box;
+        }
+
+        .eyebrow {
+          font-family: 'IBM Plex Sans', sans-serif;
+          font-weight: 600;
+          font-size: 24px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #D9A13B;
+          opacity: 0;
+          will-change: transform, opacity;
+        }
+
+        .title {
+          margin-top: 30px;
+          text-align: center;
+          font-family: 'IBM Plex Sans', sans-serif;
+          font-weight: 700;
+          font-size: 72px;
+          line-height: 1.12;
+          letter-spacing: -0.02em;
+          color: #E8EAEE;
+        }
+        .title .line { display: block; }
+        .title .w {
+          display: inline-block;
+          opacity: 0;
+          color: #E8EAEE;
+          will-change: transform, opacity;
+        }
+        .title .line2 .w {
+          will-change: transform, opacity, text-shadow;
+        }
+
+        .cards {
+          margin-top: 58px;
+          display: flex;
+          gap: 28px;
+          align-items: stretch;
+        }
+        .card {
+          position: relative;
+          width: 230px;
+          min-height: 250px;
+          padding: 30px 20px 28px;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: rgba(217, 161, 59, 0.04);
+          border: 1.5px solid rgba(217, 161, 59, 0.2);
+          border-radius: 14px;
+          opacity: 0;
+          transform-origin: 50% 50%;
+          will-change: transform, opacity;
+        }
+        .card-emph {
+          position: absolute;
+          inset: -1.5px;
+          border-radius: 14px;
+          border: 1.5px solid rgba(217, 161, 59, 0.55);
+          box-shadow: 0 0 24px rgba(217, 161, 59, 0.12);
+          pointer-events: none;
+          opacity: 0;
+        }
+        .num-wrap {
+          height: 132px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .num {
+          font-family: 'IBM Plex Mono', monospace;
+          font-weight: 600;
+          font-size: 60px;
+          line-height: 1;
+          color: #D9A13B;
+          font-variant-numeric: tabular-nums;
+          letter-spacing: -0.01em;
+          will-change: transform;
+        }
+        .label {
+          margin-top: 14px;
+          min-height: 52px;
+          font-family: 'IBM Plex Sans', sans-serif;
+          font-weight: 500;
+          font-size: 21px;
+          line-height: 1.3;
+          color: #9AA3B2;
+          text-align: center;
+        }
+      </style>
+
+      <div
+        id="root"
+        data-composition-id="03-method"
+        data-width="1920"
+        data-height="1080"
+        data-duration="5.5"
+      >
+        <!-- Track 0 — full-bleed ground -->
+        <div class="bg clip" data-start="0" data-duration="5.5" data-track-index="0"></div>
+
+        <!-- Track 1 — content stage (always mounted; reveals are GSAP-driven) -->
+        <div class="stage clip" data-start="0" data-duration="5.5" data-track-index="1">
+          <div class="eyebrow" id="eyebrow">LA MÉTHODE</div>
+
+          <div class="title">
+            <span class="line line1" id="line1"
+              ><span class="w">Un</span> <span class="w">pipeline</span> <span class="w">déterministe.</span></span
+            >
+            <span class="line line2" id="line2"
+              ><span class="w">Aucun</span> <span class="w">chiffre</span> <span class="w">inventé.</span></span
+            >
+          </div>
+
+          <div class="cards" id="cards">
+            <div class="card" data-target="4">
+              <div class="num-wrap"><span class="num">0</span></div>
+              <div class="label">sources publiques</div>
+            </div>
+            <div class="card" data-target="10">
+              <div class="num-wrap"><span class="num">0</span></div>
+              <div class="label">étapes de pipeline</div>
+            </div>
+            <div class="card" data-target="6">
+              <div class="num-wrap"><span class="num">0</span></div>
+              <div class="label">piliers notés</div>
+            </div>
+            <div class="card" data-target="0">
+              <div class="card-emph" id="emph"></div>
+              <div class="num-wrap"><span class="num" id="num0">0</span></div>
+              <div class="label">chiffre inventé</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+      <script>
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        const D = 5.5;
+
+        /* ---------- Scene 1 (0.0–1.4s): eyebrow + title assemble ---------- */
+        tl.fromTo(
+          "#eyebrow",
+          { opacity: 0, y: 16 },
+          { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
+          0.0,
+        );
+
+        // Title line 1 — per-word staggered reveal (dynamic-content-sequencing / per-word)
+        gsap.utils.toArray("#line1 .w").forEach((el, i) => {
+          tl.fromTo(
+            el,
+            { opacity: 0, y: 26 },
+            { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" },
+            0.3 + i * 0.09,
+          );
+        });
+
+        // Title line 2 — per-word reveal (near-white) as beat 2
+        gsap.utils.toArray("#line2 .w").forEach((el, i) => {
+          tl.fromTo(
+            el,
+            { opacity: 0, y: 26 },
+            { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
+            0.95 + i * 0.09,
+          );
+        });
+
+        /* ---------- Scene 1 beat 2: keyword-glow sweeps line 2 to amber ----------
+           asr-keyword-glow: monotonic near-white -> amber colour ramp + a restrained
+           amber text-shadow glint passing through each word. Writes colour + textShadow
+           ONLY (never transform) so it never collides with the reveal's GSAP transform. */
+        const kw = gsap.utils.toArray("#line2 .w");
+        const KW_START = [1.45, 1.62, 1.79];
+        const KW_RAMP = 0.38; // colour ramp seconds
+        const KW_BLUR = 16; // peak glint blur px (restrained)
+        const G_IN = 0.16,
+          G_HOLD = 0.1,
+          G_OUT = 0.45;
+        const WHITE = { r: 232, g: 234, b: 238 };
+        const AMBER = { r: 217, g: 161, b: 59 };
+        const mix = (a, b, t) => Math.round(a + (b - a) * t);
+        const glowDriver = { t: 0 };
+        tl.to(
+          glowDriver,
+          {
+            t: D,
+            duration: D,
+            ease: "none",
+            onUpdate: () => {
+              const time = glowDriver.t;
+              kw.forEach((el, i) => {
+                const s = KW_START[i];
+                const c = Math.min(Math.max((time - s) / KW_RAMP, 0), 1); // 0->1, holds at 1
+                el.style.color =
+                  "rgb(" +
+                  mix(WHITE.r, AMBER.r, c) +
+                  "," +
+                  mix(WHITE.g, AMBER.g, c) +
+                  "," +
+                  mix(WHITE.b, AMBER.b, c) +
+                  ")";
+                const a = time - s;
+                let g = 0;
+                if (a <= 0) g = 0;
+                else if (a < G_IN) g = a / G_IN;
+                else if (a < G_IN + G_HOLD) g = 1;
+                else if (a < G_IN + G_HOLD + G_OUT)
+                  g = 1 - (a - G_IN - G_HOLD) / G_OUT;
+                else g = 0;
+                el.style.textShadow =
+                  g > 0
+                    ? "0 0 " + (KW_BLUR * g).toFixed(2) + "px rgba(217,161,59," + (0.45 * g).toFixed(3) + ")"
+                    : "none";
+              });
+            },
+          },
+          0,
+        );
+
+        /* ---------- Scene 2 (1.4–4.3s): cards self-assemble + count up ----------
+           spring-pop-entrance (smooth power3.out, NO overshoot), staggered left->right;
+           each numeral co-drives count-up value + font-size (counting-dynamic-scale). */
+        const cards = gsap.utils.toArray(".card");
+        const ENTRY = [1.5, 2.15, 2.8, 3.45];
+        const FS_START = 60,
+          FS_END = 104;
+
+        cards.forEach((card, i) => {
+          // card pop
+          tl.fromTo(
+            card,
+            { opacity: 0, scale: 0, y: 24 },
+            { opacity: 1, scale: 1, y: 0, duration: 0.55, ease: "power3.out" },
+            ENTRY[i],
+          );
+
+          // numeral count-up + dynamic scale (fromTo => seek-safe on every replay)
+          const numEl = card.querySelector(".num");
+          const target = parseInt(card.getAttribute("data-target"), 10);
+          const st = { v: 0, fs: FS_START };
+          tl.fromTo(
+            st,
+            { v: 0, fs: FS_START },
+            {
+              v: target,
+              fs: FS_END,
+              duration: 0.7,
+              ease: "power3.out",
+              onUpdate: () => {
+                numEl.textContent = String(Math.round(st.v));
+                numEl.style.fontSize = st.fs.toFixed(2) + "px";
+              },
+            },
+            ENTRY[i] + 0.08,
+          );
+        });
+
+        /* ---------- Scene 3 (4.3–5.5s): hold; restrained emphasis on the "0" card ---------- */
+        // localized amber emphasis ring fades in and settles (asr-keyword-glow settle)
+        tl.fromTo(
+          "#emph",
+          { opacity: 0 },
+          { opacity: 1, duration: 0.6, ease: "power2.out" },
+          4.35,
+        );
+
+        // restrained amber glint blooms on the "0" numeral and rests lit
+        const num0 = document.getElementById("num0");
+        const glint = { e: 0 };
+        tl.fromTo(
+          glint,
+          { e: 0 },
+          {
+            e: 1,
+            duration: 0.55,
+            ease: "power2.out",
+            onUpdate: () => {
+              const blur = 18 * glint.e;
+              num0.style.textShadow =
+                "0 0 " + blur.toFixed(2) + "px rgba(217,161,59," + (0.32 * glint.e).toFixed(3) + ")";
+            },
+          },
+          4.35,
+        );
+
+        // subtle jitter on the held "0" numeral only (sine-wave-loop, low amplitude).
+        // sin(0)=0 at start so it begins exactly at the resting transform — no jump.
+        const jit = { p: 0 };
+        tl.to(
+          jit,
+          {
+            p: Math.PI * 2 * 1.5,
+            duration: 0.9,
+            ease: "none",
+            onUpdate: () => {
+              const s = 1 + Math.sin(jit.p) * 0.01;
+              const y = Math.sin(jit.p) * 2;
+              num0.style.transform = "translateY(" + y.toFixed(3) + "px) scale(" + s.toFixed(4) + ")";
+            },
+          },
+          4.6,
+        );
+
+        window.__timelines["03-method"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

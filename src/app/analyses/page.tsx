@@ -126,11 +126,11 @@ export default function DashboardPage() {
               {rows.map((row) => (
                 <li
                   key={row.id}
-                  className="analysis-row group relative flex items-center overflow-hidden rounded-md border border-border bg-surface"
+                  className="analysis-row group relative flex items-center overflow-hidden rounded-md border border-border bg-surface transition-colors duration-150 hover:border-faint/50 hover:bg-sunken"
                 >
                   <Link
                     href={`/analyses/${row.id}`}
-                    className="flex min-w-0 flex-1 items-center gap-3.5 px-4 py-3.5 transition-colors duration-150 hover:bg-sunken"
+                    className="flex min-w-0 flex-1 items-center gap-3.5 px-4 py-3.5"
                   >
                     {row.token_image ? (
                       <Image
@@ -169,7 +169,7 @@ export default function DashboardPage() {
                       setToDelete({ id: row.id, name: row.token_name });
                     }}
                     aria-label={`Supprimer l'analyse de ${row.token_name}`}
-                    className="mr-2 rounded p-2 text-faint transition-colors duration-150 hover:bg-danger/10 hover:text-danger"
+                    className="mr-2 rounded p-2 text-faint transition-colors duration-150 group-hover:text-muted hover:bg-danger/10 hover:text-danger"
                   >
                     <X className="size-4" strokeWidth={1.75} aria-hidden />
                   </button>

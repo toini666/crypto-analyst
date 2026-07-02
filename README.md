@@ -68,24 +68,28 @@ Toutes les variables sont **optionnelles** (le backend SQLite ne demande aucune 
 
 ```
 src/
-├── app/                      # Next.js (dashboard, page d'analyse, API routes)
+├── app/                      # Next.js (landing, dashboard /analyses, /portfolio, API routes)
 ├── components/               # ScoreDial, ScoreBar, PipelineStepper, ReportView…
 ├── engine/                   # le moteur d'analyse
-│   ├── methodology.ts        # ⚖️  config versionnée : piliers, poids, seuils, pénalités, garde-fous
+│   ├── methodology.ts        # ⚖️  config versionnée : piliers, poids, seuils, pénalités, garde-fous (+ version portefeuille)
 │   ├── pipeline.ts           # orchestrateur des 10 étapes (progression → SQLite)
 │   ├── fetchers/             # coingecko, defillama, goplus, github
 │   ├── metrics.ts            # calcul déterministe des ratios
 │   ├── redflags.ts           # détection quantitative (3 sévérités)
 │   ├── scoring.ts            # scores par pilier + pénalités red flags + garde-fou contrat + verdict
+│   ├── portfolio.ts          # diagnostic déterministe du portefeuille (Tier A)
 │   ├── qualitative.ts        # claude -p headless (JSON strict validé par zod)
+│   ├── vulgarization.ts      # style partagé de la repasse de vulgarisation
 │   └── report.ts             # assemblage du rapport Markdown
 └── lib/                      # types partagés, accès SQLite (lib/db), formats
 scripts/run-analysis.ts       # runner détaché (spawné par l'API route)
 scripts/rescore.ts            # re-scoring des analyses existantes (dry-run / --apply)
+scripts/vulgarize.ts          # repasse de vulgarisation de la prose qualitative
+scripts/export-reports.ts     # (ré)écriture des rapports .md versionnés dans reports/
 data/app.db                   # base SQLite locale (gitignorée, créée au 1er lancement)
 ```
 
-Schéma : tables `analyses` et `analysis_events`, créées au démarrage par `src/lib/db/`. Le frontend lit via les routes API (`GET /api/analyses`, `GET /api/analyses/[id]`) et **rafraîchit par polling** pendant qu'une analyse tourne ; les écritures passent par le runner détaché et les routes API.
+Schéma : tables `analyses`, `analysis_events`, `portfolios` et `portfolio_holdings`, créées au démarrage par `src/lib/db/`. Le frontend lit via les routes API (`GET /api/analyses`, `GET /api/analyses/[id]`, `GET /api/portfolio`) et **rafraîchit par polling** pendant qu'une analyse tourne ; les écritures passent par le runner détaché et les routes API.
 
 ## Scoring (méthodologie v2.0.0)
 

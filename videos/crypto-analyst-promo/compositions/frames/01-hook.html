@@ -1,0 +1,217 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- head is metadata for the source file only; the HyperFrames runtime clones ONLY <template> -->
+  </head>
+  <body>
+    <template>
+      <style>
+        /* ---- Fonts (VERBATIM, shipped .woff2 in assets/fonts/) ---- */
+        @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400;font-display:block;src:url('assets/fonts/plex-sans-400.woff2') format('woff2');}
+        @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:600;font-display:block;src:url('assets/fonts/plex-sans-600.woff2') format('woff2');}
+        @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:700;font-display:block;src:url('assets/fonts/plex-sans-700.woff2') format('woff2');}
+        @font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:block;src:url('assets/fonts/plex-mono-400.woff2') format('woff2');}
+        @font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:600;font-display:block;src:url('assets/fonts/plex-mono-600.woff2') format('woff2');}
+        @font-face{font-family:'Newsreader';font-style:normal;font-weight:500;font-display:block;src:url('assets/fonts/newsreader-500.woff2') format('woff2');}
+        @font-face{font-family:'Newsreader';font-style:italic;font-weight:500;font-display:block;src:url('assets/fonts/newsreader-500-italic.woff2') format('woff2');}
+
+        /* ---- Root: styled via #root only (never a class on the root element) ---- */
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          padding-top: 236px;
+          font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        /* ---- Full-bleed near-black ground on its OWN clip layer (never on #root) ---- */
+        .bg {
+          position: absolute;
+          inset: 0;
+          background: #0B0D11;
+          z-index: 0;
+        }
+        /* localized soft amber glow — radial, fades to 0 alpha (no full-screen gradient, no banding) */
+        .glow {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(60% 44% at 50% 33%,
+            rgba(217, 161, 59, 0.13) 0%,
+            rgba(217, 161, 59, 0.0) 72%);
+          pointer-events: none;
+        }
+
+        /* ---- Mono eyebrow, top-left (terminal/analyst chrome label) ---- */
+        .eyebrow {
+          position: absolute;
+          top: 60px;
+          left: 84px;
+          z-index: 2;
+          font-family: 'IBM Plex Mono', monospace;
+          font-weight: 600;
+          font-size: 15px;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: #D9A13B;
+        }
+
+        /* ---- Headline (centered, upper-third, ~62% width, IBM Plex Sans 700, near-white) ---- */
+        .headline {
+          position: relative;
+          z-index: 1;
+          max-width: 1190px;
+          text-align: center;
+          font-family: 'IBM Plex Sans', sans-serif;
+          font-weight: 700;
+          font-size: 66px;
+          line-height: 1.2;
+          letter-spacing: 0.01em;
+          color: #E8EAEE;
+        }
+        .word {
+          display: inline-block;
+          will-change: transform;
+        }
+        .word-inner {
+          display: inline-block;
+          transform-origin: 50% 50%;
+          color: #E8EAEE;
+          will-change: transform, text-shadow;
+        }
+      </style>
+
+      <div
+        id="root"
+        data-composition-id="01-hook"
+        data-start="0"
+        data-duration="4"
+        data-width="1920"
+        data-height="1080"
+      >
+        <!-- ground -->
+        <div class="bg clip" data-start="0" data-duration="4" data-track-index="0">
+          <div class="glow"></div>
+        </div>
+
+        <!-- chrome -->
+        <div class="eyebrow clip" data-start="0" data-duration="4" data-track-index="2">CRYPTO ANALYST</div>
+
+        <!-- statement that builds to the amber payoff -->
+        <div class="headline clip" data-start="0" data-duration="4" data-track-index="1">
+          <span class="word">La</span>
+          <span class="word">plupart</span>
+          <span class="word">des</span>
+          <span class="word">analyses</span>
+          <span class="word">crypto</span>
+          <span class="word">cherchent</span>
+          <span class="word">à</span>
+          <span class="word payoff"><span class="word-inner">vous</span></span>
+          <span class="word payoff"><span class="word-inner">vendre</span></span>
+          <span class="word payoff"><span class="word-inner">quelque</span></span>
+          <span class="word payoff"><span class="word-inner">chose.</span></span>
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+      <script>
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        const FRAME = document.querySelector('[data-composition-id="01-hook"]');
+        const eyebrow = FRAME.querySelector('.eyebrow');
+        const glow = FRAME.querySelector('.glow');
+        const words = Array.prototype.slice.call(FRAME.querySelectorAll('.word'));
+        const payoffInners = Array.prototype.slice.call(FRAME.querySelectorAll('.payoff .word-inner'));
+
+        // ---- Scene 1 — eyebrow fades in (early, so content is unambiguous well before 0.5s) ----
+        tl.fromTo(eyebrow,
+          { opacity: 0, y: 8 },
+          { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' },
+          0.0);
+
+        // ---- Scenes 1-2 — per-word staggered reveal (cumulative assembly).
+        //      Gap is length-weighted (longer words get a touch more lead), honoring
+        //      dynamic-content-sequencing's "longer content -> more time" intent.
+        //      A short pause precedes the payoff chunk so it lands as its own beat. ----
+        var REVEAL_BASE = 0.075, REVEAL_PER_CHAR = 0.006, INTERCHUNK_PAUSE = 0.30, REVEAL_DUR = 0.5;
+        var cursor = 0.30, pausedForChunk2 = false;
+        words.forEach(function (w) {
+          if (w.classList.contains('payoff') && !pausedForChunk2) {
+            cursor += INTERCHUNK_PAUSE;
+            pausedForChunk2 = true;
+          }
+          var len = (w.textContent || '').trim().length;
+          tl.fromTo(w,
+            { opacity: 0, y: 18 },
+            { opacity: 1, y: 0, duration: REVEAL_DUR, ease: 'power3.out' },
+            cursor);
+          cursor += REVEAL_BASE + REVEAL_PER_CHAR * len;
+        });
+
+        // ---- Scene 2 payoff (keyword glow sweep left->right) + Scene 3 hold (subtle jitter) ----
+        //  - color: monotonic near-white -> amber, HOLDS (the payoff is the color change)
+        //  - text-shadow: a low transient envelope decaying to 0 (no persistent halo -> calm)
+        //  - jitter: low-amplitude sine on the amber phrase during the hold only (sin(0)=0, no jump)
+        var GLOW = [
+          { cs: 1.95, ce: 2.12 }, // vous
+          { cs: 2.07, ce: 2.24 }, // vendre
+          { cs: 2.19, ce: 2.36 }, // quelque
+          { cs: 2.31, ce: 2.50 }  // chose.
+        ];
+        var ATTACK = 0.12, RELEASE = 0.30, MAX_BLUR = 14;
+        var FROM_RGB = [232, 234, 238], AMBER_RGB = [217, 161, 59];
+        var HOLD_START = 2.7, J_AMP = 2.5, J_PERIOD = 2.4, TWO_PI = Math.PI * 2;
+        function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+
+        var driver = { t: 0 };
+        tl.to(driver, {
+          t: 4,
+          duration: 4,
+          ease: 'none',
+          onUpdate: function () {
+            var t = driver.t;
+            var jy = 0;
+            if (t >= HOLD_START) {
+              jy = Math.sin((t - HOLD_START) * (TWO_PI / J_PERIOD)) * J_AMP;
+            }
+            for (var i = 0; i < payoffInners.length; i++) {
+              var el = payoffInners[i], g = GLOW[i];
+              // color progress (monotonic, holds at amber)
+              var p = clamp((t - g.cs) / (g.ce - g.cs), 0, 1);
+              var r = Math.round(FROM_RGB[0] + (AMBER_RGB[0] - FROM_RGB[0]) * p);
+              var gg = Math.round(FROM_RGB[1] + (AMBER_RGB[1] - FROM_RGB[1]) * p);
+              var b = Math.round(FROM_RGB[2] + (AMBER_RGB[2] - FROM_RGB[2]) * p);
+              el.style.color = 'rgb(' + r + ',' + gg + ',' + b + ')';
+              // transient glow envelope -> 0 (attack / sustain / release)
+              var env = 0;
+              if (t >= g.cs) {
+                if (t < g.cs + ATTACK) env = (t - g.cs) / ATTACK;
+                else if (t < g.ce) env = 1;
+                else if (t < g.ce + RELEASE) env = 1 - (t - g.ce) / RELEASE;
+                else env = 0;
+              }
+              var blur = MAX_BLUR * env;
+              el.style.textShadow = '0 0 ' + blur.toFixed(2) + 'px rgba(217,161,59,' + (0.45 * env).toFixed(3) + ')';
+              // single transform owner on the inner element (jitter only)
+              el.style.transform = 'translateY(' + jy.toFixed(2) + 'px)';
+            }
+          }
+        }, 0);
+
+        // ---- Scene 2 — the canvas warms as the payoff turns amber (faint, localized) ----
+        tl.fromTo(glow,
+          { opacity: 0 },
+          { opacity: 0.55, duration: 0.85, ease: 'power2.out' },
+          1.85);
+
+        window.__timelines["01-hook"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

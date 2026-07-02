@@ -1,0 +1,170 @@
+{
+  "typography": [
+    {
+      "role": "display",
+      "fontFamily": "ui-sans-serif",
+      "fontSize": "46px",
+      "fontWeight": "700",
+      "lineHeight": "48.76px",
+      "letterSpacing": "-1.15px",
+      "color": "#E8EAEE",
+      "sampleText": "Une note sur 100 que vous pouvez défendre."
+    },
+    {
+      "role": "heading",
+      "fontFamily": "ui-sans-serif",
+      "fontSize": "32px",
+      "fontWeight": "700",
+      "lineHeight": "48px",
+      "letterSpacing": "-0.8px",
+      "color": "#E8EAEE",
+      "sampleText": "Faire sa propre due diligence, c'est un travail à plein temp"
+    },
+    {
+      "role": "heading-2",
+      "fontFamily": "ui-sans-serif",
+      "fontSize": "30px",
+      "fontWeight": "700",
+      "lineHeight": "45px",
+      "letterSpacing": "-0.75px",
+      "color": "#E8EAEE",
+      "sampleText": "Prêt à arrêter de deviner ?"
+    },
+    {
+      "role": "body",
+      "fontFamily": "ui-sans-serif",
+      "fontSize": "18px",
+      "fontWeight": "400",
+      "lineHeight": "29.25px",
+      "letterSpacing": "normal",
+      "color": "#9AA3B2",
+      "sampleText": "Chaque verdict repose sur 6 piliers chiffrés, des red flags "
+    },
+    {
+      "role": "link",
+      "fontFamily": "ui-sans-serif",
+      "fontSize": "15px",
+      "fontWeight": "600",
+      "lineHeight": "22.5px",
+      "letterSpacing": "normal",
+      "color": "#0B0D11",
+      "sampleText": "Analyser un projet"
+    },
+    {
+      "role": "code",
+      "fontFamily": "ui-sans-serif",
+      "fontSize": "11.5px",
+      "fontWeight": "400",
+      "lineHeight": "17.25px",
+      "letterSpacing": "normal",
+      "color": "#5C6470",
+      "sampleText": "Méthodologie v2.0.0"
+    }
+  ],
+  "spacing": {
+    "observed": [
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      20,
+      24,
+      28,
+      36,
+      40,
+      48,
+      64
+    ],
+    "baseUnit": 4
+  },
+  "radius": [
+    "6px",
+    "3.35544e+07px"
+  ],
+  "shadows": [
+    {
+      "value": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.28) 0px 24px 60px 0px",
+      "count": 1
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Analyser un projet",
+      "background": "#D9A13B",
+      "color": "#0B0D11",
+      "padding": "14px 24px",
+      "borderRadius": "6px",
+      "border": "0px solid rgb(11, 13, 17)",
+      "boxShadow": "none",
+      "fontSize": "15px",
+      "fontWeight": "600",
+      "height": "52.5px"
+    },
+    {
+      "label": "Analyser mon portefeuille",
+      "background": "#000000",
+      "color": "#E8EAEE",
+      "padding": "14px 24px",
+      "borderRadius": "6px",
+      "border": "1px solid rgb(31, 36, 46)",
+      "boxShadow": "none",
+      "fontSize": "15px",
+      "fontWeight": "600",
+      "height": "52.5px"
+    }
+  ],
+  "cards": [
+    {
+      "label": "card",
+      "background": "#000000",
+      "color": "#E8EAEE",
+      "padding": "0px",
+      "borderRadius": "0px",
+      "border": "0px solid rgb(232, 234, 238)",
+      "boxShadow": "none",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "height": "231.75px"
+    },
+    {
+      "label": "card",
+      "background": "#11141A",
+      "color": "#E8EAEE",
+      "padding": "24px",
+      "borderRadius": "6px",
+      "border": "1px solid rgb(31, 36, 46)",
+      "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.28) 0px 24px 60px 0px",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "height": "231.75px"
+    },
+    {
+      "label": "card",
+      "background": "#11141A",
+      "color": "#E8EAEE",
+      "padding": "28px",
+      "borderRadius": "6px",
+      "border": "1px solid rgb(217, 161, 59)",
+      "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(217, 161, 59, 0.28) 0px 0px 0px 1px, rgba(217, 161, 59, 0.5) 0px 24px 60px -30px",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "height": "227.188px"
+    }
+  ],
+  "nav": {
+    "label": "navigation",
+    "background": "#11141A",
+    "color": "#E8EAEE",
+    "padding": "0px",
+    "borderRadius": "0px",
+    "border": "",
+    "boxShadow": "none",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "height": "54.5px"
+  }
+}
