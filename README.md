@@ -28,6 +28,8 @@ pnpm dev
 
 Ouvrir <http://localhost:3000>, saisir un nom + ticker, lancer. Comptez 5 à 15 minutes par analyse (la phase qualitative Claude fait de la vraie recherche web). La progression est visible en temps réel ; on peut quitter la page, le runner est un processus détaché (logs dans `logs/<id>.log`).
 
+> **Un clone démarre déjà rempli.** Les analyses de due diligence déjà réalisées sont versionnées dans le dépôt (`seed/analyses.ndjson` + rapports `.md` dans `reports/`). Au **premier lancement sur une base vide**, elles sont automatiquement réimportées dans SQLite — le dashboard n'est donc pas vide au premier démarrage. On peut aussi les (ré)importer à la main avec `pnpm seed` (idempotent). Le **portefeuille** n'est jamais versionné (données perso) : seul un exemple de démonstration est créé localement à la première visite de `/portfolio`.
+
 Une analyse peut aussi se lancer à la main :
 
 ```bash
@@ -86,6 +88,10 @@ scripts/run-analysis.ts       # runner détaché (spawné par l'API route)
 scripts/rescore.ts            # re-scoring des analyses existantes (dry-run / --apply)
 scripts/vulgarize.ts          # repasse de vulgarisation de la prose qualitative
 scripts/export-reports.ts     # (ré)écriture des rapports .md versionnés dans reports/
+scripts/export-seed.ts        # export de la graine d'analyses versionnée (seed/analyses.ndjson)
+scripts/seed.ts               # (ré)import de la graine dans la base locale (idempotent)
+seed/analyses.ndjson          # graine committée : analyses terminées (sans portefeuille)
+reports/                      # rapports .md versionnés (committés)
 data/app.db                   # base SQLite locale (gitignorée, créée au 1er lancement)
 ```
 

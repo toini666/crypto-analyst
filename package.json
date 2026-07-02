@@ -10,6 +10,8 @@
     "analyze": "tsx scripts/run-analysis.ts",
     "vulgarize": "tsx scripts/vulgarize.ts",
     "export-reports": "tsx scripts/export-reports.ts",
+    "export-seed": "tsx scripts/export-seed.ts",
+    "seed": "tsx scripts/seed.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -35,5 +37,11 @@
     "tailwindcss": "^4",
     "tsx": "^4.22.4",
     "typescript": "^5"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss@<8.5.10": ">=8.5.10",
+      "esbuild@<0.28.1": ">=0.28.1"
+    }
   }
 }

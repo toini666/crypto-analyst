@@ -6,7 +6,7 @@
 
 import Database from "better-sqlite3";
 import { randomUUID } from "node:crypto";
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import type {
   AnalysisEvent,
@@ -18,6 +18,23 @@ import type {
 
 const DB_PATH =
   process.env.DB_PATH ?? path.join(process.cwd(), "data", "app.db");
+
+// Graine d'analyses versionnée (committée dans `seed/`). Sur une base FRAÎCHE
+// (fichier `data/app.db` absent), on réimporte ces analyses pour qu'un clone du
+// dépôt bénéficie du travail déjà réalisé. Ne concerne JAMAIS le portefeuille
+// (données perso, exclues de l'export). Voir scripts/export-seed.ts & seed.ts.
+const SEED_PATH =
+  process.env.ANALYSES_SEED_PATH ??
+  path.join(process.cwd(), "seed", "analyses.ndjson");
+
+// Colonnes de `analyses` réimportées telles quelles depuis la graine (les colonnes
+// JSON restent du texte, comme stockées ; réinjection sans perte).
+const SEED_COLUMNS = [
+  "id", "created_at", "updated_at", "token_name", "ticker", "coingecko_id",
+  "token_image", "status", "current_step", "progress", "error",
+  "methodology_version", "global_score", "verdict", "confidence",
+  "pillar_scores", "red_flags", "metrics", "raw_data", "report_md",
+] as const;
 
 // Colonnes stockées en JSON (texte) côté SQLite, exposées en objets côté app.
 const JSON_COLUMNS = ["pillar_scores", "red_flags", "metrics", "raw_data"] as const;
@@ -89,13 +106,66 @@ const globalForDb = globalThis as unknown as {
   __cryptoAnalystDb?: Database.Database;
 };
 
+/**
+ * Réinjecte les analyses de la graine dans `db`, idempotent (`insert or ignore`
+ * par id : n'écrase jamais une analyse existante). Renvoie le décompte. Ne touche
+ * qu'à la table `analyses` — jamais au portefeuille.
+ */
+function seedAnalysesInto(
+  db: Database.Database,
+  file: string
+): { inserted: number; skipped: number } {
+  if (!existsSync(file)) return { inserted: 0, skipped: 0 };
+  const rows = readFileSync(file, "utf8")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((l) => JSON.parse(l) as Record<string, unknown>);
+  if (rows.length === 0) return { inserted: 0, skipped: 0 };
+
+  const stmt = db.prepare(
+    `insert or ignore into analyses (${SEED_COLUMNS.join(", ")})
+     values (${SEED_COLUMNS.map((c) => "@" + c).join(", ")})`
+  );
+  let inserted = 0;
+  const run = db.transaction((batch: Record<string, unknown>[]) => {
+    for (const row of batch) {
+      const params: Record<string, unknown> = {};
+      for (const c of SEED_COLUMNS) params[c] = row[c] ?? null;
+      inserted += stmt.run(params).changes;
+    }
+  });
+  run(rows);
+  return { inserted, skipped: rows.length - inserted };
+}
+
+/** Réimporte la graine d'analyses dans la base courante (commande `pnpm seed`). */
+export function importAnalysesSeed(
+  file: string = SEED_PATH
+): { inserted: number; skipped: number } {
+  return seedAnalysesInto(getDb(), file);
+}
+
 function init(): Database.Database {
   mkdirSync(path.dirname(DB_PATH), { recursive: true });
+  const isFresh = !existsSync(DB_PATH);
   const db = new Database(DB_PATH);
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
   db.pragma("busy_timeout = 5000");
   db.exec(SCHEMA);
+  // Base fraîche (clone du dépôt) : réimporte les analyses déjà réalisées, sans
+  // jamais faire échouer le démarrage si la graine est absente ou malformée.
+  if (isFresh) {
+    try {
+      const { inserted } = seedAnalysesInto(db, SEED_PATH);
+      if (inserted > 0) {
+        console.log(`[db] Base initialisée — ${inserted} analyse(s) importée(s) depuis la graine.`);
+      }
+    } catch (e) {
+      console.warn("[db] Import de la graine d'analyses ignoré :", (e as Error).message);
+    }
+  }
   return db;
 }
 

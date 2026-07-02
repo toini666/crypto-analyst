@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Lance Crypto Analyst en une commande :
-#   cd /Users/awagon/Documents/dev/crypto-analyst && ./start.sh
+#   cd crypto-analyst && ./start.sh
 # Backend SQLite local (./data/app.db, créé au premier lancement) — aucun service
 # à démarrer. Lance le serveur Next.js et ouvre le navigateur.
 # Port 3011 par défaut (surcharge possible : PORT=4000 ./start.sh).
